@@ -38,6 +38,11 @@ export class Connector {
 
     public disconnect(): Promise<void> {
         return new Promise<void>((resolve, reject) => {
+            if (this.connection.state === 'disconnected' || !this.connection._protocol) {
+                resolve();
+                return;
+            }
+
             this.connection.end((err: QueryError) => {
                 if (err) {
                     reject(err);
