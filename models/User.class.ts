@@ -82,10 +82,10 @@ export class User {
 
     public async save(): Promise<void> {
         const sql = `
-            INSERT INTO user (idUser, name, email, password, isActive)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO user (name, email, password, isActive)
+            VALUES (?, ?, ?, ?)
         `;
-        const values = [this._idUser, this._name, this._email, this._password, this._isActive];
+        const values = [this._name, this._email, this._password, this._isActive];
         try {
             await this._connector.connect();
             await this._connector.query(sql, values);
