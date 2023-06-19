@@ -93,7 +93,7 @@ export class Section {
         try {
             await this._connector.connect();
             await this._connector.query(sql, values);
-            console.log('User updated successfully.');
+            console.log('Section updated successfully.');
         } catch (err) {
             console.error('Error updating section:', err);
         } finally {
@@ -111,9 +111,9 @@ export class Section {
         try {
             await this._connector.connect();
             await this._connector.query(sql, values);
-            console.log('User deleted successfully.');
+            console.log('Section deleted successfully.');
         } catch (err) {
-            console.error('Error deleting user:', err);
+            console.error('Error deleting section:', err);
         } finally {
             await this._connector.disconnect();
         }
@@ -136,10 +136,10 @@ export class Section {
                 return null;
             }
             const row = rows[0];
-            const user = new Section(row.name, row.temperature, row.idSection, row.isActive);
-            return user;
+            const section = new Section(row.name, row.temperature, row.idSection, row.isActive);
+            return section;
         } catch (err) {
-            console.error('Error fetching user by ID:', err);
+            console.error('Error fetching section by ID:', err);
             return null;
         } finally {
             await connector.disconnect();

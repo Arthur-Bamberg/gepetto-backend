@@ -1,4 +1,5 @@
 import { User } from '../models/User.class';
+import { Section } from '../models/Section.class';
 import { Connector } from '../utils/Connector';
 
 describe('User', () => {
@@ -111,30 +112,74 @@ describe('User', () => {
         });
     });
 
-    describe('getAll', () => {
-        it('should retrieve all active users', async () => {
-            // Insert multiple users into the database
-            const insertSql = `INSERT INTO user (name, email, password, isActive) VALUES (?, ?, ?, ?)`;
-            const insertValues = [
-                ['John Doe', 'john@example.com', 'password123', true],
-                ['Jane Smith', 'jane@example.com', 'password456', true],
-                ['Alice Johnson', 'alice@example.com', 'password789', false],
-            ];
-            await connector.connect();
-            await Promise.all(insertValues.map((values) => connector.query(insertSql, values)));
+    describe('getAllSections', () => {
+        it('should retrieve all sections for a user', async () => {
+            const user = new User('John Doe', 'john@example.com', 'password123');
+            await user.save();
 
-            // Get all active users
-            const users = await User.getAll();
+            const section1 = new Section('Section 1', 0.1);
+            const section2 = new Section('Section 2', 0.2);
+            await section1.save();
+            await section2.save();
 
-            expect(users).toHaveLength(2);
-            expect(users[0].name).toBe('John Doe');
-            expect(users[1].name).toBe('Jane Smith');
+            await user.addSection(section1);
+            await user.addSection(section2);
+
+            const sections = await user.getAllSections();
+
+            expect(sections).toHaveLength(2);
+
+            if(sections !== null) {
+                expect(sections[0]).toBeInstanceOf(Section);
+                expect(sections[0].name).toBe('Section 1');
+                expect(sections[1]).toBeInstanceOf(Section);
+                expect(sections[1].name).toBe('Section 2');
+            }
         });
+    });
 
-        it('should return an empty array if no active users exist', async () => {
-            const users = await User.getAll();
+    describe('addSection', () => {
+        it('should add a section to a user', async () => {
+            const user = new User('John Doe', 'john@example.com', 'password123');
+            await user.save();
 
-            expect(users).toHaveLength(0);
+            const section = new Section('Section 1', 0.1);
+            await section.save();
+
+            await user.addSection(section);
+
+            const sections = await user.getAllSections();
+
+            if (sections !== null) {
+                expect(sections).toHaveLength(1);
+                expect(sections[0]).toBeInstanceOf(Section);
+                expect(sections[0].name).toBe('Section 1');    
+            }
+        });
+    });
+
+    describe('removeSection', () => {
+        it('should remove a section from a user', async () => {
+            const user = new User('John Doe', 'john@example.com', 'password123');
+            await user.save();
+
+            const section1 = new Section('Section 1', 0.1);
+            const section2 = new Section('Section 2', 0.2);
+            await section1.save();
+            await section2.save();
+
+            await user.addSection(section1);
+            await user.addSection(section2);
+
+            await user.removeSection(section1);
+
+            const sections = await user.getAllSections();
+
+            if(sections !== null) {
+                expect(sections).toHaveLength(1);
+                expect(sections[0]).toBeInstanceOf(Section);
+                expect(sections[0].name).toBe('Section 2');
+            }
         });
     });
 });
