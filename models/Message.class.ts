@@ -1,36 +1,39 @@
 import { Connector } from "../utils/Connector";
 
-enum Type {
+export enum Type {
     PROMPT = 'PROMPT',
     ANSWER = 'ANSWER'
 }
 
 export class Message {
-    private _idMessage: number;
+    private _idMessage?: number;
     private _type: Type;
-    private _isAlternativeAnswer: boolean;
-    private _isActive: boolean;
+    private _FK_idSection: number;
+    private _isAlternativeAnswer?: boolean;
+    private _isActive?: boolean;
     private _connector: Connector;
 
     constructor(
-        idMessage: number,
         type: Type,
-        isAlternativeAnswer: boolean,
-        isActive: boolean
+        FK_idSection: number,
+        isAlternativeAnswer?: boolean,
+        idMessage?: number,
+        isActive?: boolean
     ) {
         this._idMessage = idMessage;
         this._type = type;
-        this._isAlternativeAnswer = isAlternativeAnswer;
-        this._isActive = isActive;
+        this._FK_idSection = FK_idSection;
+        this._isAlternativeAnswer = isAlternativeAnswer ?? false;
+        this._isActive = isActive ?? true;
         this._connector = new Connector();
     }
 
-    get idMessage(): number {
+    get idMessage(): number | undefined {
         return this._idMessage;
     }
 
-    set idMessage(value: number) {
-        if (value >= 0) {
+    set idMessage(value: number | undefined) {
+        if (value === undefined || value >= 0) {
             this._idMessage = value;
         } else {
             throw new Error('Invalid value for idMessage');
@@ -49,30 +52,39 @@ export class Message {
         }
     }
 
-    get isAlternativeAnswer(): boolean {
+    get FK_idSection(): number {
+        return this._FK_idSection;
+    }
+
+    set FK_idSection(value: number) {
+        this._FK_idSection = value;
+    }
+
+    get isAlternativeAnswer(): boolean | undefined {
         return this._isAlternativeAnswer;
     }
 
-    set isAlternativeAnswer(value: boolean) {
+    set isAlternativeAnswer(value: boolean | undefined) {
         this._isAlternativeAnswer = value;
     }
 
-    get isActive(): boolean {
+    get isActive(): boolean | undefined {
         return this._isActive;
     }
 
-    set isActive(value: boolean) {
+    set isActive(value: boolean | undefined) {
         this._isActive = value;
     }
 
     public async save(): Promise<void> {
         const sql = `
-          INSERT INTO message (idMessage, type, isAlternativeAnswer, isActive)
-          VALUES (?, ?, ?, ?)
-        `;
+      INSERT INTO message (idMessage, type, FK_idSection, isAlternativeAnswer, isActive)
+      VALUES (?, ?, ?, ?, ?)
+    `;
         const values = [
             this._idMessage,
             this._type,
+            this._FK_idSection,
             this._isAlternativeAnswer,
             this._isActive
         ];
@@ -89,12 +101,13 @@ export class Message {
 
     public async update(): Promise<void> {
         const sql = `
-          UPDATE message
-          SET type = ?, isAlternativeAnswer = ?, isActive = ?
-          WHERE idMessage = ?
-        `;
+      UPDATE message
+      SET type = ?, FK_idSection = ?, isAlternativeAnswer = ?, isActive = ?
+      WHERE idMessage = ?
+    `;
         const values = [
             this._type,
+            this._FK_idSection,
             this._isAlternativeAnswer,
             this._isActive,
             this._idMessage
@@ -112,10 +125,10 @@ export class Message {
 
     public async delete(): Promise<void> {
         const sql = `
-          UPDATE message
-          SET isActive = 0
-          WHERE idMessage = ?
-        `;
+      UPDATE message
+      SET isActive = 0
+      WHERE idMessage = ?
+    `;
         const values = [this._idMessage];
         try {
             await this._connector.connect();
@@ -130,10 +143,10 @@ export class Message {
 
     public static async getById(id: number): Promise<Message | null> {
         const sql = `
-          SELECT idMessage, type, isAlternativeAnswer, isActive
-          FROM message
-          WHERE idMessage = ?
-        `;
+      SELECT idMessage, type, FK_idSection, isAlternativeAnswer, isActive
+      FROM message
+      WHERE idMessage = ?
+    `;
         const values = [id];
 
         const connector = new Connector();
@@ -146,9 +159,10 @@ export class Message {
             }
             const row = rows[0];
             const message = new Message(
-                row.idMessage,
                 row.type,
+                row.FK_idSection,
                 row.isAlternativeAnswer,
+                row.idMessage,
                 row.isActive
             );
             return message;
