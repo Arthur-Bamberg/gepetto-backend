@@ -91,6 +91,7 @@ export class Message {
         try {
             await this._connector.connect();
             await this._connector.query(sql, values);
+            this._idMessage = await this._connector.getLastInsertedId();
             console.log('Message saved successfully.');
         } catch (err) {
             console.error('Error saving message:', err);

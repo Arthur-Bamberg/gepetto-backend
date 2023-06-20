@@ -166,6 +166,7 @@ export class User {
         try {
             await this._connector.connect();
             await this._connector.query(sql, values);
+            this._idUser = await this._connector.getLastInsertedId();
             console.log('User saved successfully.');
         } catch (err) {
             console.error('Error saving user:', err);

@@ -75,6 +75,7 @@ export class Section {
         try {
             await this._connector.connect();
             await this._connector.query(sql, values);
+            this._idSection = await this._connector.getLastInsertedId();
             console.log('Section saved successfully.');
         } catch (err) {
             console.error('Error saving section:', err);

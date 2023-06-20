@@ -11,9 +11,13 @@ describe('User', () => {
 
     beforeEach(async () => {
         // Ensure the user table is empty before each test
-        const sql = `DELETE FROM user`;
+        const sqlUserSection = `DELETE FROM userSection`;
+        const sqlSection = `DELETE FROM section`;
+        const sqlUser = `DELETE FROM user`;
         await connector.connect();
-        await connector.query(sql);
+        await connector.query(sqlUserSection);
+        await connector.query(sqlSection);
+        await connector.query(sqlUser);
         await connector.disconnect();
     });
 
@@ -112,6 +116,27 @@ describe('User', () => {
         });
     });
 
+    describe('addSection', () => {
+        it('should add a section to a user', async () => {
+            const user = new User('John Doe', 'john@example.com', 'password123');
+            await user.save();
+
+            const section = new Section('Section 1', 0.1);
+            await section.save();
+
+            await user.addSection(section);
+
+            const sections = await user.getAllSections();
+
+            if (sections !== null) {
+                console.log(sections);
+                expect(sections).toHaveLength(1);
+                expect(sections[0]).toBeInstanceOf(Section);
+                expect(sections[0].name).toBe('Section 1');    
+            }
+        });
+    });
+
     describe('getAllSections', () => {
         it('should retrieve all sections for a user', async () => {
             const user = new User('John Doe', 'john@example.com', 'password123');
@@ -134,26 +159,6 @@ describe('User', () => {
                 expect(sections[0].name).toBe('Section 1');
                 expect(sections[1]).toBeInstanceOf(Section);
                 expect(sections[1].name).toBe('Section 2');
-            }
-        });
-    });
-
-    describe('addSection', () => {
-        it('should add a section to a user', async () => {
-            const user = new User('John Doe', 'john@example.com', 'password123');
-            await user.save();
-
-            const section = new Section('Section 1', 0.1);
-            await section.save();
-
-            await user.addSection(section);
-
-            const sections = await user.getAllSections();
-
-            if (sections !== null) {
-                expect(sections).toHaveLength(1);
-                expect(sections[0]).toBeInstanceOf(Section);
-                expect(sections[0].name).toBe('Section 1');    
             }
         });
     });
