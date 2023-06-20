@@ -1,5 +1,6 @@
 import { Connector } from '../utils/Connector';
 import { Section } from '../models/Section.class';
+import { Message } from '../models/Message.class';
 
 describe('Section', () => {
     let connector: Connector;
@@ -10,9 +11,13 @@ describe('Section', () => {
 
     beforeEach(async () => {
         // Ensure the section table is empty before each test
-        const sql = `DELETE FROM section`;
+        const sqlMessage = `DELETE FROM message`;
+        const sqlUserSection = `DELETE FROM userSection`;
+        const sqlSection = `DELETE FROM section`;
         await connector.connect();
-        await connector.query(sql);
+        await connector.query(sqlMessage);
+        await connector.query(sqlUserSection);
+        await connector.query(sqlSection);
         await connector.disconnect();
     });
 
@@ -114,6 +119,42 @@ describe('Section', () => {
             const section = await Section.getById(999);
 
             expect(section).toBeNull();
+        });
+    });
+
+    describe('getMessages', () => {
+        it('should retrieve messages for the section', async () => {
+            // Insert a section into the database
+            const insertSql = `INSERT INTO section (name, temperature, isActive) VALUES (?, ?, ?)`;
+            const insertValues = ['Test Section', 0.5, 1];
+            await connector.connect();
+            await connector.query(insertSql, insertValues);
+
+            // Insert some messages for the section
+            const sectionId = await connector.getLastInsertedId(); // Assuming getLastInsertId() returns the ID of the last inserted row
+
+            console.log('section bolas', sectionId);
+
+            const messageSql = `INSERT INTO message (FK_idSection, content) VALUES (?, ?)`;
+            const messageValues = [sectionId, 'Message 1'];
+
+            await connector.query(messageSql, messageValues);
+
+            console.log(messageValues);
+
+            // Get the section instance
+            const section = new Section('Test Section', 0.5, sectionId, true);
+
+            console.log(section);
+
+            // Retrieve messages for the section
+            const messages = await section.getMessages();
+
+            console.log(messages);
+
+            expect(messages).toHaveLength(1);
+            expect(messages[0]).toBeInstanceOf(Message);
+            expect(messages[0].content).toBe('Message 1');
         });
     });
 });

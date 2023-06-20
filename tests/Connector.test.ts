@@ -20,6 +20,11 @@ describe('Connector', () => {
         expect(rows).toHaveLength(1);
     });
 
+    it('should get the last inserted ID', async () => {
+        const lastInsertId = await connector.getLastInsertedId();
+        expect(lastInsertId).toBe(0);
+    });
+
     it('should disconnect from the database', async () => {
         await expect(connector.disconnect()).resolves.toBeUndefined();
     });

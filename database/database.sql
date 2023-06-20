@@ -21,6 +21,7 @@ USE `gepetto`;
 CREATE TABLE IF NOT EXISTS `message` (
     `idMessage` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
     `type` ENUM('PROMPT', 'ANSWER') NOT NULL,
+    `content` VARCHAR(500) NOT NULL,
     `FK_idSection` INT(11) UNSIGNED NOT NULL,
     `isAlternativeAnswer` TINYINT(1) UNSIGNED NOT NULL,
     `isActive` TINYINT(1) UNSIGNED NOT NULL,

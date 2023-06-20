@@ -66,6 +66,37 @@ export class Section {
 		this._isActive = active;
 	}
 
+    public async getMessages(): Promise<Message[]> {
+        const sql = `
+            SELECT 
+                message.idMessage, 
+                message.content, 
+                message.type, 
+                message.isAlternativeAnswer, 
+                message.isActive,
+                message.FK_idSection
+
+            FROM message
+
+            WHERE message.FK_idSection = ?
+        `;
+        const values = [this._idSection];
+        try {
+            await this._connector.connect();
+            const rows = await this._connector.query(sql, values);
+            const messages: Message[] = [];
+            for (const row of rows) {
+                messages.push(new Message(row.content, row.type, row.FK_idSection, row.isAlternativeAnswer, row.isActive, row.idMessage));
+            }
+            return messages;
+        } catch (err) {
+            console.error('Error getting messages:', err);
+            return [];
+        } finally {
+            await this._connector.disconnect();
+        }
+    }
+
 	public async save(): Promise<void> {
         const sql = `
             INSERT INTO section (name, temperature, isActive)

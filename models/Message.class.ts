@@ -7,6 +7,7 @@ export enum Type {
 
 export class Message {
     private _idMessage?: number;
+    private _content: string;
     private _type: Type;
     private _FK_idSection: number;
     private _isAlternativeAnswer?: boolean;
@@ -14,6 +15,7 @@ export class Message {
     private _connector: Connector;
 
     constructor(
+        content: string,
         type: Type,
         FK_idSection: number,
         isAlternativeAnswer?: boolean,
@@ -21,6 +23,7 @@ export class Message {
         isActive?: boolean
     ) {
         this._idMessage = idMessage;
+        this._content = content;
         this._type = type;
         this._FK_idSection = FK_idSection;
         this._isAlternativeAnswer = isAlternativeAnswer ?? false;
@@ -38,6 +41,14 @@ export class Message {
         } else {
             throw new Error('Invalid value for idMessage');
         }
+    }
+
+    get content(): string {
+        return this._content;
+    }
+
+    set content(value: string) {
+        this._content = value;
     }
 
     get type(): Type {
@@ -78,11 +89,11 @@ export class Message {
 
     public async save(): Promise<void> {
         const sql = `
-      INSERT INTO message (idMessage, type, FK_idSection, isAlternativeAnswer, isActive)
-      VALUES (?, ?, ?, ?, ?)
-    `;
+            INSERT INTO message (content, type, FK_idSection, isAlternativeAnswer, isActive)
+            VALUES (?, ?, ?, ?, ?)
+        `;
         const values = [
-            this._idMessage,
+            this._content,
             this._type,
             this._FK_idSection,
             this._isAlternativeAnswer,
@@ -102,11 +113,12 @@ export class Message {
 
     public async update(): Promise<void> {
         const sql = `
-      UPDATE message
-      SET type = ?, FK_idSection = ?, isAlternativeAnswer = ?, isActive = ?
-      WHERE idMessage = ?
-    `;
+            UPDATE message
+            SET content = ?, type = ?, FK_idSection = ?, isAlternativeAnswer = ?, isActive = ?
+            WHERE idMessage = ?
+        `;
         const values = [
+            this._content,
             this._type,
             this._FK_idSection,
             this._isAlternativeAnswer,
@@ -126,10 +138,10 @@ export class Message {
 
     public async delete(): Promise<void> {
         const sql = `
-      UPDATE message
-      SET isActive = 0
-      WHERE idMessage = ?
-    `;
+            UPDATE message
+            SET isActive = 0
+            WHERE idMessage = ?
+        `;
         const values = [this._idMessage];
         try {
             await this._connector.connect();
@@ -144,10 +156,10 @@ export class Message {
 
     public static async getById(id: number): Promise<Message | null> {
         const sql = `
-      SELECT idMessage, type, FK_idSection, isAlternativeAnswer, isActive
-      FROM message
-      WHERE idMessage = ?
-    `;
+            SELECT idMessage, content, type, FK_idSection, isAlternativeAnswer, isActive
+            FROM message
+            WHERE idMessage = ?
+        `;
         const values = [id];
 
         const connector = new Connector();
@@ -160,6 +172,7 @@ export class Message {
             }
             const row = rows[0];
             const message = new Message(
+                row.content,
                 row.type,
                 row.FK_idSection,
                 row.isAlternativeAnswer,
