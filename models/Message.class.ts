@@ -88,22 +88,36 @@ export class Message {
     }
 
     public async save(): Promise<void> {
-        const sql = `
+        const messageSql = `
             INSERT INTO message (content, type, FK_idSection, isAlternativeAnswer, isActive)
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?);
         `;
-        const values = [
+        const messageValues = [
             this._content,
             this._type,
             this._FK_idSection,
             this._isAlternativeAnswer,
-            this._isActive
+            this._isActive,
+            this._FK_idSection
         ];
+
+        const sectionSql = `
+            UPDATE section
+            SET FK_idLastMessage = LAST_INSERT_ID()
+            WHERE idSection = ?;
+        `;
+
+        const sectionValues = [this._FK_idSection];
         try {
             await this._connector.connect();
-            await this._connector.query(sql, values);
+            // await this._connector.beginTransaction();
+
+            await this._connector.query(messageSql, messageValues);
             this._idMessage = await this._connector.getLastInsertedId();
-            console.log('Message saved successfully.');
+
+            await this._connector.query(sectionSql, sectionValues);
+
+            // await this._connector.commit();
         } catch (err) {
             console.error('Error saving message:', err);
         } finally {
@@ -128,7 +142,6 @@ export class Message {
         try {
             await this._connector.connect();
             await this._connector.query(sql, values);
-            console.log('Message updated successfully.');
         } catch (err) {
             console.error('Error updating message:', err);
         } finally {
@@ -146,7 +159,6 @@ export class Message {
         try {
             await this._connector.connect();
             await this._connector.query(sql, values);
-            console.log('Message deleted successfully.');
         } catch (err) {
             console.error('Error deleting message:', err);
         } finally {

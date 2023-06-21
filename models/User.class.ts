@@ -125,7 +125,6 @@ export class User {
                 this._sections = [];
             }
             this._sections.push(section);
-            console.log('Section added successfully.');
         } catch (err) {
             console.error('Error adding section:', err);
         } finally {
@@ -149,7 +148,6 @@ export class User {
                     this._sections.splice(sectionIndex, 1);
                 }
             }
-            console.log('Section removed successfully.');
         } catch (err) {
             console.error('Error removing section:', err);
         } finally {
@@ -167,7 +165,6 @@ export class User {
             await this._connector.connect();
             await this._connector.query(sql, values);
             this._idUser = await this._connector.getLastInsertedId();
-            console.log('User saved successfully.');
         } catch (err) {
             console.error('Error saving user:', err);
         } finally {
@@ -185,7 +182,6 @@ export class User {
         try {
             await this._connector.connect();
             await this._connector.query(sql, values);
-            console.log('User updated successfully.');
         } catch (err) {
             console.error('Error updating user:', err);
         } finally {
@@ -203,7 +199,6 @@ export class User {
         try {
             await this._connector.connect();
             await this._connector.query(sql, values);
-            console.log('User deleted successfully.');
         } catch (err) {
             console.error('Error deleting user:', err);
         } finally {

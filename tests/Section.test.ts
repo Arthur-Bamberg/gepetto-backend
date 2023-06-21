@@ -1,6 +1,6 @@
 import { Connector } from '../utils/Connector';
 import { Section } from '../models/Section.class';
-import { Message } from '../models/Message.class';
+import { Message, Type } from '../models/Message.class';
 
 describe('Section', () => {
     let connector: Connector;
@@ -11,10 +11,12 @@ describe('Section', () => {
 
     beforeEach(async () => {
         // Ensure the section table is empty before each test
+        const sqlUpdateSection = `UPDATE section SET FK_idLastMessage = NULL`;
         const sqlMessage = `DELETE FROM message`;
         const sqlUserSection = `DELETE FROM userSection`;
         const sqlSection = `DELETE FROM section`;
         await connector.connect();
+        await connector.query(sqlUpdateSection);
         await connector.query(sqlMessage);
         await connector.query(sqlUserSection);
         await connector.query(sqlSection);
@@ -124,37 +126,56 @@ describe('Section', () => {
 
     describe('getMessages', () => {
         it('should retrieve messages for the section', async () => {
-            // Insert a section into the database
-            const insertSql = `INSERT INTO section (name, temperature, isActive) VALUES (?, ?, ?)`;
-            const insertValues = ['Test Section', 0.5, 1];
-            await connector.connect();
-            await connector.query(insertSql, insertValues);
+            const section = new Section('Test Section', 0.5);
+            await section.save();
 
-            // Insert some messages for the section
-            const sectionId = await connector.getLastInsertedId(); // Assuming getLastInsertId() returns the ID of the last inserted row
+            if (section.idSection === undefined) {
+                throw new Error('Section ID is undefined');
+            }
 
-            console.log('section bolas', sectionId);
+            const messageContent = 'Message 1';
+            const message = new Message(messageContent, Type.PROMPT, section.idSection);
+            await message.save();
 
-            const messageSql = `INSERT INTO message (FK_idSection, content) VALUES (?, ?)`;
-            const messageValues = [sectionId, 'Message 1'];
-
-            await connector.query(messageSql, messageValues);
-
-            console.log(messageValues);
-
-            // Get the section instance
-            const section = new Section('Test Section', 0.5, sectionId, true);
-
-            console.log(section);
-
-            // Retrieve messages for the section
             const messages = await section.getMessages();
-
-            console.log(messages);
 
             expect(messages).toHaveLength(1);
             expect(messages[0]).toBeInstanceOf(Message);
-            expect(messages[0].content).toBe('Message 1');
+            expect(messages[0].content).toBe(messageContent);
+        });
+    });
+
+    describe('getLastMessage', () => {
+        it('should retrieve the last message for the section', async () => {
+            const section = new Section('Test Section', 0.5);
+            await section.save();
+
+            if (section.idSection === undefined) {
+                throw new Error('Section ID is undefined');
+            }
+
+            const messageContent1 = 'Message 1';
+            const messageContent2 = 'Message 2';
+
+            const message1 = new Message(messageContent1, Type.PROMPT, section.idSection);
+            await message1.save();
+
+            const message2 = new Message(messageContent2, Type.PROMPT, section.idSection);
+            await message2.save();
+
+            const lastMessage = await section.getLastMessage();
+
+            expect(lastMessage).toBeInstanceOf(Message);
+            expect(lastMessage?.content).toBe(messageContent2);
+        });
+
+        it('should return undefined if there are no messages for the section', async () => {
+            const section = new Section('Test Section', 0.5);
+            await section.save();
+
+            const lastMessage = await section.getLastMessage();
+
+            expect(lastMessage).toBeUndefined();
         });
     });
 });

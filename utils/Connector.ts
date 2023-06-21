@@ -69,4 +69,28 @@ export class Connector {
             });
         });
     }
+
+    public beginTransaction(): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            this.connection.beginTransaction((err: QueryError) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                resolve();
+            });
+        });
+    }
+
+    public commit(): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            this.connection.commit((err: QueryError) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                resolve();
+            });
+        });
+    }
 }

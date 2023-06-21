@@ -11,11 +11,13 @@ describe('User', () => {
 
     beforeEach(async () => {
         // Ensure the user table is empty before each test
+        const sqlUpdateSection = `UPDATE section SET FK_idLastMessage = NULL`;
         const sqlMessage = `DELETE FROM message`;
         const sqlUserSection = `DELETE FROM userSection`;
         const sqlSection = `DELETE FROM section`;
         const sqlUser = `DELETE FROM user`;
         await connector.connect();
+        await connector.query(sqlUpdateSection);
         await connector.query(sqlMessage);
         await connector.query(sqlUserSection);
         await connector.query(sqlSection);
@@ -131,7 +133,6 @@ describe('User', () => {
             const sections = await user.getAllSections();
 
             if (sections !== null) {
-                console.log(sections);
                 expect(sections).toHaveLength(1);
                 expect(sections[0]).toBeInstanceOf(Section);
                 expect(sections[0].name).toBe('Section 1');    
