@@ -126,7 +126,7 @@ export class User {
             }
             this._sections.push(section);
         } catch (err) {
-            console.error('Error adding section:', err);
+            console.error('Error adding section to user:', err);
         } finally {
             await this._connector.disconnect();
         }
@@ -149,7 +149,7 @@ export class User {
                 }
             }
         } catch (err) {
-            console.error('Error removing section:', err);
+            console.error('Error removing section from user:', err);
         } finally {
             await this._connector.disconnect();
         }

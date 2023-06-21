@@ -110,14 +110,10 @@ export class Message {
         const sectionValues = [this._FK_idSection];
         try {
             await this._connector.connect();
-            await this._connector.beginTransaction();
-
             await this._connector.query(messageSql, messageValues);
             this._idMessage = await this._connector.getLastInsertedId();
 
             await this._connector.query(sectionSql, sectionValues);
-
-            await this._connector.commit();
         } catch (err) {
             console.error('Error saving message:', err);
         } finally {

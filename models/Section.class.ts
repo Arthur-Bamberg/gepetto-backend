@@ -48,7 +48,7 @@ export class Section {
 		this._name = name;
 	}
 
-	public async getLastMessage(): Promise<Message | undefined> {
+	public async getLastMessage(): Promise<Message | null> {
 		if (this._lastMessage === undefined) {
 			const sql = `
             SELECT 
@@ -71,12 +71,16 @@ export class Section {
 				await this._connector.connect();
 				const rows = await this._connector.query(sql, values);
 
+				if (rows.length === 0) {
+					return null;
+				}
+
 				const message = new Message(rows[0].content, rows[0].type, rows[0].FK_idSection, rows[0].isAlternativeAnswer, rows[0].isActive, rows[0].idMessage);
 
 				this._lastMessage = message;
 			} catch (err) {
 				console.error('Error getting messages:', err);
-				return undefined;
+				return null;
 			} finally {
 				await this._connector.disconnect();
 			}
@@ -97,7 +101,7 @@ export class Section {
 		this._isActive = active;
 	}
 
-	public async getMessages(): Promise<Message[]> {
+	public async getMessages(): Promise<Message[] | null> {
 		if (this._messages === undefined) {
 			const sql = `
             SELECT 
@@ -116,6 +120,11 @@ export class Section {
 			try {
 				await this._connector.connect();
 				const rows = await this._connector.query(sql, values);
+
+				if (rows.length === 0) {
+					return null;
+				}
+
 				const messages: Message[] = [];
 				for (const row of rows) {
 					messages.push(new Message(row.content, row.type, row.FK_idSection, row.isAlternativeAnswer, row.isActive, row.idMessage));

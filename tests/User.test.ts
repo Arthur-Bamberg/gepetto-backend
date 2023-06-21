@@ -1,16 +1,18 @@
 import { User } from '../models/User.class';
 import { Section } from '../models/Section.class';
 import { Connector } from '../utils/Connector';
+import { cleanDatabase } from './cleanDatabase';
 
 describe('User', () => {
     let connector: Connector;
 
     beforeAll(() => {
         connector = new Connector();
+        cleanDatabase();
     });
 
     beforeEach(async () => {
-        // Ensure the user table is empty before each test
+        //Ensure the user table is empty before each test
         const sqlUpdateSection = `UPDATE section SET FK_idLastMessage = NULL`;
         const sqlMessage = `DELETE FROM message`;
         const sqlUserSection = `DELETE FROM userSection`;
@@ -23,6 +25,10 @@ describe('User', () => {
         await connector.query(sqlSection);
         await connector.query(sqlUser);
         await connector.disconnect();
+    });
+
+    afterAll(async () => {
+        cleanDatabase();
     });
 
     describe('save', () => {

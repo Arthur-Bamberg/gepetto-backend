@@ -1,6 +1,7 @@
 import { Connector } from '../utils/Connector';
 import { Section } from '../models/Section.class';
 import { Message, Type } from '../models/Message.class';
+import { cleanDatabase } from './cleanDatabase';
 
 describe('Section', () => {
     let connector: Connector;
@@ -21,6 +22,10 @@ describe('Section', () => {
         await connector.query(sqlUserSection);
         await connector.query(sqlSection);
         await connector.disconnect();
+    });
+
+    afterAll(async () => {
+        cleanDatabase();
     });
 
     describe('save', () => {
@@ -139,6 +144,10 @@ describe('Section', () => {
 
             const messages = await section.getMessages();
 
+            if(messages === null) {
+                throw new Error('Messages are null');
+            }
+
             expect(messages).toHaveLength(1);
             expect(messages[0]).toBeInstanceOf(Message);
             expect(messages[0].content).toBe(messageContent);
@@ -175,7 +184,7 @@ describe('Section', () => {
 
             const lastMessage = await section.getLastMessage();
 
-            expect(lastMessage).toBeUndefined();
+            expect(lastMessage).toBeNull();
         });
     });
 });
