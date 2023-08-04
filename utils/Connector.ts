@@ -1,14 +1,15 @@
 import { createConnection, QueryError, RowDataPacket } from 'mysql2';
-
+import dotenv from 'dotenv';
+dotenv.config();
 export class Connector {
     private connection: any;
 
     constructor() {
         this.connection = createConnection({
-            host: 'localhost',
-            user: 'root',
-            password: '',
-            database: 'gepetto'
+            host: process.env.HOST,
+            user: process.env.USER,
+            password: process.env.PASSWORD,
+            database: process.env.DATABASE
         });
     }
 
@@ -61,30 +62,6 @@ export class Connector {
             }
 
             this.connection.end((err: QueryError) => {
-                if (err) {
-                    reject(err);
-                    return;
-                }
-                resolve();
-            });
-        });
-    }
-
-    public beginTransaction(): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
-            this.connection.beginTransaction((err: QueryError) => {
-                if (err) {
-                    reject(err);
-                    return;
-                }
-                resolve();
-            });
-        });
-    }
-
-    public commit(): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
-            this.connection.commit((err: QueryError) => {
                 if (err) {
                     reject(err);
                     return;

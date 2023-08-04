@@ -158,6 +158,37 @@ export class Section {
 		}
 	}
 
+	public static async getAll(): Promise<Section[] | null> {
+		const sql = `
+            SELECT idSection, name, temperature, isActive
+            FROM section`;
+
+		const connector = new Connector();
+
+		try {
+			await connector.connect();
+			const rows = await connector.query(sql);
+			const sections: Section[] = [];
+			
+			if (rows.length === 0) {
+				return null;
+			}
+
+			rows.forEach((row) => {
+				const section = new Section(row.name, row.temperature, row.idSection, row.isActive);
+				sections.push(section);
+			});
+
+			return sections;
+
+		} catch (err) {
+			console.error('Error fetching sections:', err);
+			return null;
+		} finally {
+			await connector.disconnect();
+		}
+	}
+
 	public async update(): Promise<void> {
 		const sql = `
             UPDATE section
