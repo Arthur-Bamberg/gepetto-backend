@@ -1,6 +1,8 @@
 import { createConnection, QueryError, RowDataPacket } from 'mysql2';
 import dotenv from 'dotenv';
 dotenv.config();
+
+console.log(process.env);
 export class Connector {
     private connection: any;
 
