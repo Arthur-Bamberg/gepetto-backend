@@ -3,8 +3,8 @@ import { Section } from "./Section.class";
 
 export class User {
     private _idUser?: number;
-    private _name: string;
-    private _email: string;
+    private _name!: string;
+    private _email!: string;
     private _password?: string;
     private _isActive?: boolean;
     private _sections?: Section[];
@@ -18,11 +18,15 @@ export class User {
         idUser?: number,
         isActive?: boolean
     ) {
-        this._name = name;
-        this._email = email;
-        this._password = password;
-        this._idUser = idUser;
-        this._isActive = isActive ?? true;
+        this.name = name;
+        this.email = email;
+        this.idUser = idUser;
+        this.isActive = isActive ?? true;
+
+        if(password) {
+            this.password = password;
+        }
+
         this._connector = new Connector();
     }
 

@@ -1,5 +1,6 @@
 import { Connector } from '../utils/Connector';
 import { Section } from '../models/Section.class';
+import { Message, Type } from '../models/Message.class';
 
 describe('Section', () => {
     let connector: Connector;
@@ -9,7 +10,6 @@ describe('Section', () => {
     });
 
     beforeEach(async () => {
-        // Ensure the section table is empty before each test
         const sqlUpdateSection = `UPDATE section SET FK_idLastMessage = NULL`;
         const sqlMessage = `DELETE FROM message`;
         const sqlUserSection = `DELETE FROM userSection`;
@@ -22,17 +22,12 @@ describe('Section', () => {
         await connector.disconnect();
     });
 
-    afterAll(async () => {
-        cleanDatabase();
-    });
-
     describe('save', () => {
-        it('should save a new section', async () => {
+        it('Deve salvar uma nova seção', async () => {
             const section = new Section('Test Section', 0.5);
 
             await section.save();
 
-            // Verify that the section is saved to the database
             const sql = `SELECT * FROM section`;
             await connector.connect();
             const rows = await connector.query(sql);
@@ -41,29 +36,26 @@ describe('Section', () => {
             expect(rows).toHaveLength(1);
             expect(rows[0].name).toBe('Test Section');
             expect(rows[0].temperature).toBe(0.5);
-            expect(rows[0].isActive).toBe(1); // Updated assertion
+            expect(rows[0].isActive).toBe(1); 
         });
     });
 
     describe('update', () => {
-        it('should update an existing section', async () => {
-            // Insert a section into the database
+        it('Deve atualizar uma seção existente', async () => {
+            
             const insertSql = `INSERT INTO section (name, temperature, isActive) VALUES (?, ?, ?)`;
-            const insertValues = ['Test Section', 0.5, 1]; // Updated value
+            const insertValues = ['Test Section', 0.5, 1]; 
             await connector.connect();
             await connector.query(insertSql, insertValues);
 
-            // Get the inserted section
             const selectSql = `SELECT * FROM section`;
             const rows = await connector.query(selectSql);
             const section = new Section(rows[0].name, rows[0].temperature, rows[0].idSection, rows[0].isActive);
 
-            // Update the section
             section.name = 'Updated Section';
             section.temperature = 0.8;
             await section.update();
 
-            // Verify that the section is updated in the database
             const updatedRows = await connector.query(selectSql);
             await connector.disconnect();
 
@@ -74,53 +66,48 @@ describe('Section', () => {
     });
 
     describe('delete', () => {
-        it('should set isActive to false for an existing section', async () => {
-            // Insert a section into the database
+        it('Deve deixar o isActive de uma seção como falsa', async () => {
+            
             const insertSql = `INSERT INTO section (name, temperature, isActive) VALUES (?, ?, ?)`;
-            const insertValues = ['Test Section', 0.5, 1]; // Updated value
+            const insertValues = ['Test Section', 0.5, 1]; 
             await connector.connect();
             await connector.query(insertSql, insertValues);
 
-            // Get the inserted section
             const selectSql = `SELECT * FROM section`;
             const rows = await connector.query(selectSql);
             const section = new Section(rows[0].name, rows[0].temperature, rows[0].idSection, rows[0].isActive);
 
-            // Delete the section
             await section.delete();
 
-            // Verify that isActive is set to false in the database
             const deletedRows = await connector.query(selectSql);
             await connector.disconnect();
 
             expect(deletedRows).toHaveLength(1);
-            expect(deletedRows[0].isActive).toBe(0); // Updated assertion
+            expect(deletedRows[0].isActive).toBe(0); 
         });
     });
 
     describe('getById', () => {
-        it('should retrieve a section by ID', async () => {
-            // Insert a section into the database
+        it('Deve retornar uma seção pelo ID', async () => {
+            
             const insertSql = `INSERT INTO section (name, temperature, isActive) VALUES (?, ?, ?)`;
-            const insertValues = ['Test Section', 0.5, 1]; // Updated value
+            const insertValues = ['Test Section', 0.5, 1]; 
             await connector.connect();
             await connector.query(insertSql, insertValues);
 
-            // Get the inserted section
             const selectSql = `SELECT * FROM section`;
             const rows = await connector.query(selectSql);
             const sectionId = rows[0].idSection;
 
-            // Retrieve the section by ID
             const section = await Section.getById(sectionId);
 
             expect(section).toBeInstanceOf(Section);
             expect(section?.name).toBe('Test Section');
             expect(section?.temperature).toBe(0.5);
-            expect(section?.isActive).toBe(1); // Updated assertion
+            expect(section?.isActive).toBe(1); 
         });
 
-        it('should return null for a non-existent section ID', async () => {
+        it('Deve retornar null para uma seção que não existe no ID', async () => {
             const section = await Section.getById(999);
 
             expect(section).toBeNull();
@@ -128,7 +115,7 @@ describe('Section', () => {
     });
 
     describe('getMessages', () => {
-        it('should retrieve messages for the section', async () => {
+        it('Deve retornar as mensagens pela seção', async () => {
             const section = new Section('Test Section', 0.5);
             await section.save();
 
@@ -152,8 +139,8 @@ describe('Section', () => {
         });
     });
 
-    describe('getLastMessage', () => {
-        it('should retrieve the last message for the section', async () => {
+    describe('Busca a última mensagem', () => {
+        it('Deve retornar a última mensagem da seção', async () => {
             const section = new Section('Test Section', 0.5);
             await section.save();
 

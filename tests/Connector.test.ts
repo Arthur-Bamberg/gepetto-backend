@@ -17,14 +17,18 @@ describe('Connector', () => {
     });
 
     it('Deve pegar o último id inserido', async () => {
-        await connector.query('DELETE FROM user');
+        await connector.query('DELETE FROM test');
 
-        const sql = `INSERT INTO user (name, email, password) VALUES (?, ?, ?)`;
-        await connector.query(sql, [
-            'John Doe',
-            'jhon.doe@email.com',
-            'Pass*123'
-        ]);
+        const sql = `INSERT INTO test () VALUES ()`;
+        await connector.query(sql);
+
+        const lastInsertId = await connector.getLastInsertedId();
+
+        expect(lastInsertId).not.toBe(0);
+    });
+
+    it('Deve retornar 0 para o último id inserido', async () => {
+        await connector.query('DELETE FROM test');
 
         const lastInsertId = await connector.getLastInsertedId();
 
@@ -32,25 +36,14 @@ describe('Connector', () => {
     });
 
     it('Deve buscar os usuários', async () => {
-        await connector.query('DELETE FROM user');
+        await connector.query('DELETE FROM test');
 
-        const sql = `INSERT INTO user (idUser, name, email, password) VALUES (100, ?, ?, ?)`;
-        await connector.query(sql, [
-            'John Doe',
-            'jhon.doe@email.com',
-            'Pass*123'
-        ]);
+        const sql = `INSERT INTO test (idTest) VALUES (100)`;
+        await connector.query(sql);
 
-        const rows = await connector.query('SELECT * FROM user');
+        const rows = await connector.query('SELECT * FROM test');
         expect(rows).toHaveLength(1);
-        expect(rows[0]).toEqual({
-            idUser: 100,
-            name: 'John Doe',
-            email: 'jhon.doe@email.com',
-            password: 'Pass*123',
-            isAdmin: 0,
-            isActive: 1
-        });
+        expect(rows[0].idTest).toBe(100);
     });
 
     it('Deve desconectar do banco', async () => {

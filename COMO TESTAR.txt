@@ -1,0 +1,4 @@
+1. Rodar npm install
+2. Importar o sql de /database/testDatabase.sql
+3. Entrar na pasta /tests: "cd tests"
+4. Rodar o comando "npx jest -i"

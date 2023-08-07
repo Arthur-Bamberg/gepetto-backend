@@ -89,6 +89,12 @@ CREATE TABLE IF NOT EXISTS `userSection` (
 
 -- Dumping data for table gepetto-test.userSection: ~0 rows (approximately)
 
+-- Dumping structure for table gepetto-test.test
+CREATE TABLE IF NOT EXISTS `test` (
+  `idTest` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`idTest`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
 /*!40014 SET FOREIGN_KEY_CHECKS=IFNULL(@OLD_FOREIGN_KEY_CHECKS, 1) */;

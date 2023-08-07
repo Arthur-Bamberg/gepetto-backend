@@ -7,11 +7,9 @@ describe('User', () => {
 
     beforeAll(() => {
         connector = new Connector();
-        cleanDatabase();
     });
 
     beforeEach(async () => {
-        //Ensure the user table is empty before each test
         const sqlUpdateSection = `UPDATE section SET FK_idLastMessage = NULL`;
         const sqlMessage = `DELETE FROM message`;
         const sqlUserSection = `DELETE FROM userSection`;
@@ -26,72 +24,67 @@ describe('User', () => {
         await connector.disconnect();
     });
 
-    afterAll(async () => {
-        cleanDatabase();
-    });
-
     describe('save', () => {
-        it('should save a new user', async () => {
-            const user = new User('John Doe', 'john@example.com', 'password123');
+        it('deve salvar um novo usuário', async () => {
+            const user = new User('João da Silva', 'joao@example.com', 'Senha*123');
             await user.save();
 
-            // Verify that the user is saved to the database
             const sql = `SELECT * FROM user`;
             await connector.connect();
             const rows = await connector.query(sql);
             await connector.disconnect();
 
             expect(rows).toHaveLength(1);
-            expect(rows[0].name).toBe('John Doe');
-            expect(rows[0].email).toBe('john@example.com');
+            expect(rows[0].name).toBe('João da Silva');
+            expect(rows[0].email).toBe('joao@example.com');
         });
     });
 
+    it('Deve gerar erro para email inválido', async () => {
+        expect(() => new User('João da Silva', 'joao.com', 'Senha*123')).toThrowError('Invalid email format.');
+    });
+
+    it('Deve gerar erro para senha inválida', async () => {
+        expect(()=> new User('João da Silva', 'joao@example.com', 'a123')).toThrowError('password must contain at least 8 characters, including uppercase, lowercase, digit, and special characters.');
+    });
+
     describe('update', () => {
-        it('should update an existing user', async () => {
-            // Insert a user into the database
+        it('deve atualizar um usuário existente', async () => {
             const insertSql = `INSERT INTO user (name, email, password, isActive) VALUES (?, ?, ?, ?)`;
-            const insertValues = ['John Doe', 'john@example.com', 'password123', true];
+            const insertValues = ['João da Silva', 'joao@example.com', 'senha123', true];
             await connector.connect();
             await connector.query(insertSql, insertValues);
 
-            // Get the inserted user
             const selectSql = `SELECT * FROM user`;
             const rows = await connector.query(selectSql);
             const user = new User(rows[0].name, rows[0].email, '', rows[0].idUser, rows[0].isActive);
 
-            // Update the user
-            user.name = 'Updated Name';
-            user.email = 'updated@example.com';
+            user.name = 'Nome Atualizado';
+            user.email = 'atualizado@example.com';
             await user.update();
 
-            // Verify that the user is updated in the database
             const updatedRows = await connector.query(selectSql);
             await connector.disconnect();
 
             expect(updatedRows).toHaveLength(1);
-            expect(updatedRows[0].name).toBe('Updated Name');
-            expect(updatedRows[0].email).toBe('updated@example.com');
+            expect(updatedRows[0].name).toBe('Nome Atualizado');
+            expect(updatedRows[0].email).toBe('atualizado@example.com');
         });
     });
 
     describe('delete', () => {
-        it('should set isActive to 0 for an existing user', async () => {
-            // Insert a user into the database
+        it('deve definir isActive como 0 para um usuário existente', async () => {
             const insertSql = `INSERT INTO user (name, email, password, isActive) VALUES (?, ?, ?, ?)`;
-            const insertValues = ['John Doe', 'john@example.com', 'password123', true];
+            const insertValues = ['João da Silva', 'joao@example.com', 'senha123', true];
             await connector.connect();
             await connector.query(insertSql, insertValues);
 
-            // Get the inserted user
             const selectSql = `SELECT * FROM user`;
             const rows = await connector.query(selectSql);
             const user = new User(rows[0].name, rows[0].email, '', rows[0].idUser, rows[0].isActive);
 
-            // Delete the user
             await user.delete();
 
-            // Verify that isActive is set to 0 in the database
             const deletedRows = await connector.query(selectSql);
             await connector.disconnect();
 
@@ -101,24 +94,22 @@ describe('User', () => {
     });
 
     describe('getById', () => {
-        it('should retrieve a user by ID', async () => {
-            // Insert a user into the database
+        it('deve recuperar um usuário por ID', async () => {
             const insertSql = `INSERT INTO user (name, email, password, isActive) VALUES (?, ?, ?, ?)`;
-            const insertValues = ['John Doe', 'john@example.com', 'password123', true];
+            const insertValues = ['João da Silva', 'joao@example.com', 'senha123', true];
             await connector.connect();
             await connector.query(insertSql, insertValues);
 
-            // Get the inserted user
             const selectSql = `SELECT * FROM user`;
             const rows = await connector.query(selectSql);
             const user = await User.getById(rows[0].idUser);
 
             expect(user).toBeInstanceOf(User);
-            expect(user?.name).toBe('John Doe');
-            expect(user?.email).toBe('john@example.com');
+            expect(user?.name).toBe('João da Silva');
+            expect(user?.email).toBe('joao@example.com');
         });
 
-        it('should return null for a non-existent user ID', async () => {
+        it('deve retornar null para um ID de usuário inexistente', async () => {
             const user = await User.getById(999);
 
             expect(user).toBeNull();
@@ -126,11 +117,11 @@ describe('User', () => {
     });
 
     describe('addSection', () => {
-        it('should add a section to a user', async () => {
-            const user = new User('John Doe', 'john@example.com', 'password123');
+        it('deve adicionar uma seção a um usuário', async () => {
+            const user = new User('João da Silva', 'joao@example.com', 'Senha*123');
             await user.save();
 
-            const section = new Section('Section 1', 0.1);
+            const section = new Section('Seção 1', 0.1);
             await section.save();
 
             await user.addSection(section);
@@ -140,18 +131,18 @@ describe('User', () => {
             if (sections !== null) {
                 expect(sections).toHaveLength(1);
                 expect(sections[0]).toBeInstanceOf(Section);
-                expect(sections[0].name).toBe('Section 1');    
+                expect(sections[0].name).toBe('Seção 1');
             }
         });
     });
 
     describe('getAllSections', () => {
-        it('should retrieve all sections for a user', async () => {
-            const user = new User('John Doe', 'john@example.com', 'password123');
+        it('deve recuperar todas as seções de um usuário', async () => {
+            const user = new User('João da Silva', 'joao@example.com', 'Senha*123');
             await user.save();
 
-            const section1 = new Section('Section 1', 0.1);
-            const section2 = new Section('Section 2', 0.2);
+            const section1 = new Section('Seção 1', 0.1);
+            const section2 = new Section('Seção 2', 0.2);
             await section1.save();
             await section2.save();
 
@@ -162,22 +153,22 @@ describe('User', () => {
 
             expect(sections).toHaveLength(2);
 
-            if(sections !== null) {
+            if (sections !== null) {
                 expect(sections[0]).toBeInstanceOf(Section);
-                expect(sections[0].name).toBe('Section 1');
+                expect(sections[0].name).toBe('Seção 1');
                 expect(sections[1]).toBeInstanceOf(Section);
-                expect(sections[1].name).toBe('Section 2');
+                expect(sections[1].name).toBe('Seção 2');
             }
         });
     });
 
     describe('removeSection', () => {
-        it('should remove a section from a user', async () => {
-            const user = new User('John Doe', 'john@example.com', 'password123');
+        it('deve remover uma seção de um usuário', async () => {
+            const user = new User('João da Silva', 'joao@example.com', 'Senha*123');
             await user.save();
 
-            const section1 = new Section('Section 1', 0.1);
-            const section2 = new Section('Section 2', 0.2);
+            const section1 = new Section('Seção 1', 0.1);
+            const section2 = new Section('Seção 2', 0.2);
             await section1.save();
             await section2.save();
 
@@ -188,10 +179,10 @@ describe('User', () => {
 
             const sections = await user.getAllSections();
 
-            if(sections !== null) {
+            if (sections !== null) {
                 expect(sections).toHaveLength(1);
                 expect(sections[0]).toBeInstanceOf(Section);
-                expect(sections[0].name).toBe('Section 2');
+                expect(sections[0].name).toBe('Seção 2');
             }
         });
     });
