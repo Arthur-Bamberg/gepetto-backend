@@ -2,17 +2,25 @@ import { createConnection, QueryError, RowDataPacket } from 'mysql2';
 import dotenv from 'dotenv';
 dotenv.config();
 
-console.log(process.env);
 export class Connector {
     private connection: any;
 
     constructor() {
-        this.connection = createConnection({
-            host: process.env.HOST,
-            user: process.env.USER,
-            password: process.env.PASSWORD,
-            database: process.env.DATABASE
-        });
+        if(process.env.HOST && process.env.USER && process.env.PASSWORD && process.env.DATABASE) {
+            this.connection = createConnection({
+                host: process.env.HOST,
+                user: process.env.USER,
+                password: process.env.PASSWORD,
+                database: process.env.DATABASE
+            });
+        } else { //testDatabase
+            this.connection = createConnection({
+                host: 'localhost',
+                user: 'root',
+                password: '',
+                database: 'gepetto-test'
+            });
+        }
     }
 
     public connect(): Promise<void> {
