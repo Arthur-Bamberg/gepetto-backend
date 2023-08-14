@@ -6,7 +6,7 @@ export class Connector {
     private connection: any;
 
     constructor() {
-        if(process.env.HOST && process.env.USER && process.env.PASSWORD && process.env.DATABASE) {
+        if(process.env.HOST && process.env.USER && process.env.DATABASE) {
             this.connection = createConnection({
                 host: process.env.HOST,
                 user: process.env.USER,

@@ -249,4 +249,13 @@ export class Section {
 			await connector.disconnect();
 		}
 	}
+
+	public json() {
+		return {
+			idSection: this._idSection,
+			name: this._name,
+			temperature: this._temperature,
+			isActive: this._isActive
+		};
+	}
 }

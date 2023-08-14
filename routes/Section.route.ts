@@ -1,34 +1,34 @@
 import express, { Request, Response } from 'express';
-import bodyParser from 'body-parser';
+import { SectionController } from '../controllers/Section.controller';
 
 const app = express();
 const port = 3000;
-const route = '/sections';
 
-app.use(bodyParser.json());
+const sectionController = new SectionController();
 
-app.get(route, (req: Request, res: Response) => {
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-	res.json();
+app.post('/sections', async (req: Request, res: Response) => {
+    const formData = req.body;
+
+    if (!formData.name || !formData.temperature) {
+        return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const section = await sectionController.createSection(formData);
+
+    res.status(201).json(section.json());
 });
 
-// app.post('/items', (req: Request, res: Response) => {
-//   const newItem: string = req.body.item;
-//   items.push(newItem);
-//   res.json(items);
-// });
-
-// const itemId: number = parseInt(req.params.id);
-// const updatedItem: string = req.body.item;
-
-// if (isNaN(itemId) || itemId < 0 || itemId >= items.length) {
-//   return res.status(400).json({ message: 'Invalid item ID' });
-// }
-
-// items[itemId] = updatedItem;
-// res.json(items);
-// });
+app.get('/sections/:idSection/messages', (req: Request, res: Response) => {
+    const message = parseInt(req.params.idSection);
+    if (isNaN(message)) {
+        return res.status(404).json({ message: 'Message not found' });
+    }
+    res.json(message);
+});
 
 app.listen(port, () => {
-	console.log(`Server running on http://localhost:${port}`);
+    console.log(`Server is running at http://localhost:${port}`);
 });

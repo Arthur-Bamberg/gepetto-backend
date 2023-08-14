@@ -7,9 +7,9 @@ export enum Type {
 
 export class Message {
     private _idMessage?: number;
-    private _content: string;
-    private _type: Type;
-    private _FK_idSection: number;
+    private _content?: string;
+    private _type?: Type;
+    private _FK_idSection?: number;
     private _isAlternativeAnswer?: boolean;
     private _isActive?: boolean;
     private _connector: Connector;
@@ -22,11 +22,11 @@ export class Message {
         idMessage?: number,
         isActive?: boolean
     ) {
-        this._idMessage = idMessage;
-        this._content = content;
-        this._type = type;
-        this._FK_idSection = FK_idSection;
-        this._isAlternativeAnswer = isAlternativeAnswer ?? false;
+        this.idMessage = idMessage;
+        this.content = content;
+        this.type = type;
+        this.FK_idSection = FK_idSection;
+        this.isAlternativeAnswer = isAlternativeAnswer ?? false;
         this._isActive = isActive ?? true;
         this._connector = new Connector();
     }
@@ -43,7 +43,7 @@ export class Message {
         }
     }
 
-    get content(): string {
+    get content(): string | undefined {
         return this._content;
     }
 
@@ -51,7 +51,7 @@ export class Message {
         this._content = value;
     }
 
-    get type(): Type {
+    get type(): Type | undefined {
         return this._type;
     }
 
@@ -63,7 +63,7 @@ export class Message {
         }
     }
 
-    get FK_idSection(): number {
+    get FK_idSection(): number | undefined {
         return this._FK_idSection;
     }
 
@@ -194,5 +194,16 @@ export class Message {
         } finally {
             await connector.disconnect();
         }
+    }
+
+    public json() {
+        return {
+            idMessage: this.idMessage,
+            content: this.content,
+            type: this.type,
+            idSection: this.FK_idSection,
+            isAlternativeAnswer: this.isAlternativeAnswer,
+            isActive: this._isActive
+        };
     }
 }
