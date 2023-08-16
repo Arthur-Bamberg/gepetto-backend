@@ -1,8 +1,6 @@
 import express, { Request, Response } from 'express';
 import { MessageController } from '../controllers/Message.controller';
 
-const messageController = new MessageController();
-
 const app = express();
 const port = 3000;
 
@@ -16,7 +14,7 @@ app.post('/messages', async (req: Request, res: Response) => {
         return res.status(400).json({ message: 'Missing required fields' });
     }
 
-    const message = await messageController.createMessage(formData);
+    const message = await MessageController.createMessage(formData);
 
     res.status(201).json(message.json());
 });
@@ -33,13 +31,13 @@ app.patch('/messages/:idMessage', async (req: Request, res: Response) => {
         return res.status(400).json({ message: 'Missing required fields!' });
     }
 
-    const message = await messageController.getMessage(idMessage);
+    const message = await MessageController.getMessage(idMessage);
 
     if(!message) {
         return res.status(404).json({ message: 'Message not found!' });
     }
 
-    await messageController.updateMessage(message, formData);
+    await MessageController.updateMessage(message, formData);
 
     res.status(200).json(message.json());
 });
@@ -49,13 +47,13 @@ app.delete('/messages/:idMessage', async (req: Request, res: Response) => {
     if (isNaN(idMessage)) {
         return res.status(404).json({ message: 'Invalid idMessage!' });
     }
-    const message = await messageController.getMessage(idMessage);
+    const message = await MessageController.getMessage(idMessage);
 
     if(!message) {
         return res.status(404).json({ message: 'Message not found!' });
     }
 
-    await messageController.deleteMessage(message);
+    await MessageController.deleteMessage(message);
 
     res.status(200).json(message.json());
 });

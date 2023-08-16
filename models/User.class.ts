@@ -162,7 +162,7 @@ export class User {
     public async save(): Promise<void> {
         const sql = `
             INSERT INTO user (name, email, password, isActive)
-            VALUES (?, ?, ?, ?)
+            VALUES (?, ?, md5(sha1(?)), ?)
         `;
         const values = [this._name, this._email, this._password, this._isActive];
         try {
@@ -179,10 +179,10 @@ export class User {
     public async update(): Promise<void> {
         const sql = `
             UPDATE user
-            SET name = ?, email = ?
+            SET name = ?, email = ?, password = md5(sha1(?)), isActive = ?
             WHERE idUser = ?
         `;
-        const values = [this._name, this._email, this._idUser];
+        const values = [this._name, this._email, this._password, this._isActive, this._idUser];
         try {
             await this._connector.connect();
             await this._connector.query(sql, values);
@@ -203,6 +203,7 @@ export class User {
         try {
             await this._connector.connect();
             await this._connector.query(sql, values);
+            this.isActive = false;
         } catch (err) {
             console.error('Error deleting user:', err);
         } finally {
@@ -235,5 +236,14 @@ export class User {
         } finally {
             await connector.disconnect();
         }
+    }
+
+    public json() {
+        return {
+            idUser: this._idUser,
+            name: this._name,
+            email: this._email,
+            isActive: this._isActive
+        };
     }
 }

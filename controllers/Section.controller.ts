@@ -1,13 +1,13 @@
 import { Section } from "../models/Section.class";
 
 export class SectionController {
-    async createSection(formData: any): Promise<Section> {
+    public static async createSection(formData: any): Promise<Section> {
         const section = new Section(formData.name, formData.temperature, formData.isActive ?? 1);
         await section.save();
         return section;
     }
 
-    async updateSection(section: Section, formData: any): Promise<void> {
+    public static async updateSection(section: Section, formData: any): Promise<void> {
         if(formData.name) {
             section.name = formData.name;
         }
@@ -23,19 +23,19 @@ export class SectionController {
         await section.update();
     }
 
-    async deleteSection(section: Section): Promise<void> {
+    public static async deleteSection(section: Section): Promise<void> {
         await section.delete();
     }
 
-    async getSection(idSection: number): Promise<Section | null> {
+    public static async getSection(idSection: number): Promise<Section | null> {
         return await Section.getById(idSection);
     }
 
-    async getMessages(section: Section): Promise<any[]> {
+    public static async getMessages(section: Section): Promise<any[]> {
         return await section.getMessages() ?? [];
     }
 
-    async getSections(): Promise<any[] | []> {
+    public static async getSections(): Promise<any[] | []> {
         return await Section.getAll() ?? [];    
     }
 }
