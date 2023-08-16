@@ -21,12 +21,68 @@ app.post('/sections', async (req: Request, res: Response) => {
     res.status(201).json(section.json());
 });
 
-app.get('/sections/:idSection/messages', (req: Request, res: Response) => {
-    const message = parseInt(req.params.idSection);
-    if (isNaN(message)) {
-        return res.status(404).json({ message: 'Message not found' });
+app.patch('/sections/:idSection', async (req: Request, res: Response) => {
+    const idSection = parseInt(req.params.idSection);
+    const formData = req.body;
+
+    if (isNaN(idSection)) {
+        return res.status(404).json({ message: 'Invalid idSection!' });
     }
-    res.json(message);
+
+    if (!formData.name && !formData.temperature && !formData.isActive) {
+        return res.status(400).json({ message: 'Missing required fields!' });
+    }
+
+    const section = await sectionController.getSection(idSection);
+
+    if (!section) {
+        return res.status(404).json({ message: 'Section not found!' });
+    }
+
+    await sectionController.updateSection(section, formData);
+    
+    res.status(200).json(section.json());
+});
+
+app.delete('/sections/:idSection', async (req: Request, res: Response) => {
+    const idSection = parseInt(req.params.idSection);
+
+    if (isNaN(idSection)) {
+        return res.status(404).json({ message: 'Invalid idSection!' });
+    }
+
+    const section = await sectionController.getSection(idSection);
+
+    if (!section) {
+        return res.status(404).json({ message: 'Section not found!' });
+    }
+
+    await sectionController.deleteSection(section);
+
+    res.status(200).json(section.json());
+});
+
+app.get('/sections/:idSection/messages', async (req: Request, res: Response) => {
+    const idSection = parseInt(req.params.idSection);
+    if (isNaN(idSection)) {
+        return res.status(404).json({ message: 'Invalid idSection!' });
+    }
+
+    const section = await sectionController.getSection(idSection);
+
+    if(!section) {
+        return res.status(404).json({ message: 'Section not found!' });
+    }
+
+    const messages = await sectionController.getMessages(section);
+
+    res.status(200).json(messages);
+});
+
+app.get('/sections', async (req: Request, res: Response) => {
+    const sections = await sectionController.getSections();
+
+    res.status(200).json(sections);
 });
 
 app.listen(port, () => {

@@ -8,7 +8,7 @@ export class Section {
 	private _temperature: Temperature;
 	private _name: string;
 	private _lastMessage?: Message;
-	private _messages?: Message[];
+	private _messages?: any [];
 	private _isActive?: boolean;
 	private _connector: Connector;
 
@@ -101,7 +101,7 @@ export class Section {
 		this._isActive = active;
 	}
 
-	public async getMessages(): Promise<Message[] | null> {
+	public async getMessages(): Promise<any[] | null> {
 		if (this._messages === undefined) {
 			const sql = `
             SELECT 
@@ -125,9 +125,9 @@ export class Section {
 					return null;
 				}
 
-				const messages: Message[] = [];
+				const messages = [];
 				for (const row of rows) {
-					messages.push(new Message(row.content, row.type, row.FK_idSection, row.isAlternativeAnswer, row.isActive, row.idMessage));
+					messages.push(new Message(row.content, row.type, row.FK_idSection, row.isAlternativeAnswer, row.idMessage, row.isActive).json());
 				}
 				this._messages = messages;
 			} catch (err) {
@@ -158,25 +158,43 @@ export class Section {
 		}
 	}
 
-	public static async getAll(): Promise<Section[] | null> {
+	public static async getAll(): Promise<any[] | null> {
 		const sql = `
-            SELECT idSection, name, temperature, isActive
-            FROM section`;
+            SELECT 
+				section.idSection, 
+				section.name, 
+				section.temperature, 
+				section.isActive,
+
+				message.idMessage,
+				message.content,
+				message.type,
+				message.isAlternativeAnswer,
+				message.isActive as messageIsActive
+
+            FROM section
+				LEFT JOIN message
+					ON section.FK_idLastMessage = message.idMessage`;
 
 		const connector = new Connector();
 
 		try {
 			await connector.connect();
 			const rows = await connector.query(sql);
-			const sections: Section[] = [];
+			const sections:any[] = [];
 			
 			if (rows.length === 0) {
 				return null;
 			}
 
 			rows.forEach((row) => {
-				const section = new Section(row.name, row.temperature, row.idSection, row.isActive);
-				sections.push(section);
+				if(row.idMessage !== null) {
+					const message = new Message(row.content, row.type, row.idSection, row.isAlternativeAnswer, row.idMessage, row.messageIsActive);	
+
+					sections.push(new Section(row.name, row.temperature, row.idSection, row.isActive, message).json());
+				} else {
+					sections.push(new Section(row.name, row.temperature, row.idSection, row.isActive).json());
+				}
 			});
 
 			return sections;
@@ -192,10 +210,10 @@ export class Section {
 	public async update(): Promise<void> {
 		const sql = `
             UPDATE section
-            SET name = ?, temperature = ?
+            SET name = ?, temperature = ?, isActive = ?
             WHERE idSection = ?
         `;
-		const values = [this._name, this._temperature, this._idSection];
+		const values = [this._name, this._temperature, this._isActive, this._idSection];
 		try {
 			await this._connector.connect();
 			await this._connector.query(sql, values);
@@ -216,6 +234,8 @@ export class Section {
 		try {
 			await this._connector.connect();
 			await this._connector.query(sql, values);
+
+			this.isActive = false;
 		} catch (err) {
 			console.error('Error deleting section:', err);
 		} finally {
@@ -255,7 +275,8 @@ export class Section {
 			idSection: this._idSection,
 			name: this._name,
 			temperature: this._temperature,
-			isActive: this._isActive
+			isActive: this._isActive,
+			lastMessage: this._lastMessage?.json()
 		};
 	}
 }

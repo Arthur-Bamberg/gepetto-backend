@@ -1,4 +1,3 @@
-import { Message } from "../models/Message.class";
 import { Section } from "../models/Section.class";
 
 export class SectionController {
@@ -8,15 +7,35 @@ export class SectionController {
         return section;
     }
 
-    async getMessages(idSection: number): Promise<Message[] | null> {
-        const section = await Section.getById(idSection);
-        if (!section) {
-            return null;
+    async updateSection(section: Section, formData: any): Promise<void> {
+        if(formData.name) {
+            section.name = formData.name;
         }
-        return await section.getMessages();
+
+        if(formData.temperature) {
+            section.temperature = formData.temperature;
+        }
+
+        if(formData.isActive) {
+            section.isActive = formData.isActive;
+        }
+
+        await section.update();
     }
 
-    async getSections(): Promise<Section[] | null> {
-        return await Section.getAll();
+    async deleteSection(section: Section): Promise<void> {
+        await section.delete();
+    }
+
+    async getSection(idSection: number): Promise<Section | null> {
+        return await Section.getById(idSection);
+    }
+
+    async getMessages(section: Section): Promise<any[]> {
+        return await section.getMessages() ?? [];
+    }
+
+    async getSections(): Promise<any[] | []> {
+        return await Section.getAll() ?? [];    
     }
 }

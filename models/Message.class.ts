@@ -155,6 +155,7 @@ export class Message {
         try {
             await this._connector.connect();
             await this._connector.query(sql, values);
+            this.isActive = false;
         } catch (err) {
             console.error('Error deleting message:', err);
         } finally {

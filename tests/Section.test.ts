@@ -134,8 +134,12 @@ describe('Section', () => {
             }
 
             expect(messages).toHaveLength(1);
-            expect(messages[0]).toBeInstanceOf(Message);
-            expect(messages[0].content).toBe(messageContent);
+
+            expect(messages[0].content).toEqual(messageContent);
+            expect(messages[0].type).toEqual(Type.PROMPT);
+            expect(messages[0].idSection).toEqual(section.idSection);
+            expect(messages[0].isAlternativeAnswer).toEqual(0);
+            expect(messages[0].isActive).toEqual(1);
         });
     });
 

@@ -7,14 +7,27 @@ export class MessageController {
         return message;
     }
 
-    public async deleteMessage(idMessage: number): Promise<Message> {
-        const message = await Message.getById(idMessage);
-        if (!message) {
-            throw new Error('Message not found');
+    public async getMessage(idMessage: number): Promise<Message | null> {
+        return await Message.getById(idMessage);
+    }
+
+    public async updateMessage(message: Message, formData: any): Promise<void> {
+        if(formData.content) {
+            message.content = formData.content;
+        } 
+
+        if(formData.isAlternativeAnswer) {
+            message.isAlternativeAnswer = formData.isAlternativeAnswer;
         }
 
-        await message.delete();
+        if(formData.isActive) {
+            message.isActive = formData.isActive;
+        }
 
-        return message;
+        await message.update();
+    }
+
+    public async deleteMessage(message: Message): Promise<void> {
+        await message.delete();
     }
 }
