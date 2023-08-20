@@ -1,13 +1,10 @@
 import express, { Request, Response } from 'express';
 import { UserController } from '../controllers/User.controller';
+import { authenticateUser } from './Authenticator.route';
 
-const app = express();
-const port = 3000;
+export const UserRoute = express.Router();
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-app.post('/users', async (req: Request, res: Response) => {
+UserRoute.post('/', async (req: Request, res: Response) => {
     const formData = req.body;
 
     if (!formData.name || !formData.email || !formData.password) {
@@ -19,8 +16,10 @@ app.post('/users', async (req: Request, res: Response) => {
     res.status(201).json(user.json());
 });
 
-app.patch('/users/:idUser', async (req: Request, res: Response) => {
-    const idUser = parseInt(req.params.idUser);
+UserRoute.patch('/', async (req: Request, res: Response) => {
+    const idUser = await authenticateUser(req, res);
+
+    if (typeof idUser != "number") return;
     const formData = req.body;
 
     if (isNaN(idUser)) {
@@ -38,12 +37,14 @@ app.patch('/users/:idUser', async (req: Request, res: Response) => {
     }
 
     await UserController.updateUser(user, formData);
-    
+
     res.status(200).json(user.json());
 });
 
-app.delete('/users/:idUser', async (req: Request, res: Response) => {
-    const idUser = parseInt(req.params.idUser);
+UserRoute.delete('/', async (req: Request, res: Response) => {
+    const idUser = await authenticateUser(req, res);
+
+    if (typeof idUser != "number") return;
 
     if (isNaN(idUser)) {
         return res.status(404).json({ message: 'Invalid idUser!' });
@@ -58,8 +59,4 @@ app.delete('/users/:idUser', async (req: Request, res: Response) => {
     await UserController.deleteUser(user);
 
     res.status(200).json(user.json());
-});
-
-app.listen(port, () => {
-    console.log(`Server is running at http://localhost:${port}`);
 });

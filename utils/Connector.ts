@@ -17,7 +17,7 @@ export class Connector {
             this.connection = createConnection({
                 host: 'localhost',
                 user: 'root',
-                password: '',
+                password: 'pelota',
                 database: 'gepetto-test'
             });
         }

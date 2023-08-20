@@ -7,7 +7,6 @@ export class User {
     private _email!: string;
     private _password?: string;
     private _isActive?: boolean;
-    private _sections?: Section[];
     private static _safeParams: string = 'user.idUser, user.name, user.email, user.isActive';
     private _connector: Connector;
 
@@ -86,79 +85,6 @@ export class User {
         this._isActive = value;
     }
 
-    public async getAllSections(): Promise<Section[] | null> {
-        const sql =
-            `SELECT 
-            section.idSection, section.name, section.temperature, section.isActive
-        FROM section
-            INNER JOIN userSection
-                ON section.idSection = userSection.FK_idSection
-        WHERE 
-            userSection.FK_idUser = ?
-            and section.isActive = 1
-        `;
-
-        const values = [this._idUser];
-
-        const connector = new Connector();
-
-        try {
-            await connector.connect();
-            const rows = await connector.query(sql, values);
-            this._sections = rows.map((row) => new Section(row.name, row.temperature, row.idSection, row.isActive));
-            return this._sections;
-        } catch (err) {
-            console.error("Error fetching user's sections:", err);
-            return [];
-        } finally {
-            await connector.disconnect();
-        }
-    }
-
-    public async addSection(section: Section): Promise<void> {
-        const sql = `
-            INSERT INTO userSection (FK_idUser, FK_idSection)
-            VALUES (?, ?)
-        `;
-        const values = [this._idUser, section.idSection];
-
-        try {
-            await this._connector.connect();
-            await this._connector.query(sql, values);
-            if (!this._sections) {
-                this._sections = [];
-            }
-            this._sections.push(section);
-        } catch (err) {
-            console.error('Error adding section to user:', err);
-        } finally {
-            await this._connector.disconnect();
-        }
-    }
-
-    public async removeSection(section: Section): Promise<void> {
-        const sql = `
-            DELETE FROM userSection
-            WHERE FK_idUser = ? AND FK_idSection = ?
-        `;
-        const values = [this._idUser, section.idSection];
-
-        try {
-            await this._connector.connect();
-            await this._connector.query(sql, values);
-            if (this._sections) {
-                const sectionIndex = this._sections.findIndex((s) => s.idSection === section.idSection);
-                if (sectionIndex !== -1) {
-                    this._sections.splice(sectionIndex, 1);
-                }
-            }
-        } catch (err) {
-            console.error('Error removing section from user:', err);
-        } finally {
-            await this._connector.disconnect();
-        }
-    }
-
     public async save(): Promise<void> {
         const sql = `
             INSERT INTO user (name, email, password, isActive)
@@ -235,6 +161,82 @@ export class User {
             return null;
         } finally {
             await connector.disconnect();
+        }
+    }
+
+    public static async validateLogin(email: string, password: string): Promise<object | null> {
+        const sql = `
+            SELECT ${User._safeParams}
+            FROM user
+            WHERE email = ? AND password = md5(sha1(?)) AND isActive = 1
+        `;
+        const values = [email, password];
+
+        const connector = new Connector();
+
+        try {
+            await connector.connect();
+            const rows = await connector.query(sql, values);
+            if (rows.length === 0) {
+                return null;
+            }
+            const row = rows[0];
+            const user = new User(row.name, row.email, password, row.idUser, row.isActive);
+            return user.json();
+        } catch (err) {
+            console.error('Error validating user login:', err);
+            return null;
+        } finally {
+            await connector.disconnect();
+        }
+    }
+
+    public static async updateAuthentication(userData: any): Promise<any> {
+        const issuedAt = Date.now();
+
+        userData.iat = Math.floor(issuedAt / 1000);
+
+        userData.exp = Math.floor(issuedAt / 1000) + 24 * (60 * 60); // 24 hours
+
+        const sql = `UPDATE user SET issuedAt = ? WHERE idUser = ?`;
+        const values = [new Date(issuedAt), userData.idUser];
+
+        const connector = new Connector();
+
+        try {
+            await connector.connect();
+
+            await connector.query(sql, values);
+
+            return userData;
+        } catch (err) {
+            console.error('Error updating authentication:', err);
+        } finally {
+            await connector.disconnect();
+        }
+    }
+
+    public static async tokenIsValid(tokenData: any): Promise<boolean> {
+        const sql = `
+            SELECT idUser
+            FROM user
+            WHERE email = ? AND name = ? AND idUser = ? AND issuedAt = ? AND isActive = 1
+        `;
+        const values = [tokenData.email, tokenData.name, tokenData.idUser, new Date((tokenData.iat + 1) * 1000)];
+
+        const connector = new Connector();
+
+        try {
+            await connector.connect();
+            const rows = await connector.query(sql, values);
+            if (rows.length === 0) {
+                return false;
+            }
+
+            return true;
+        } catch (err: any) {
+            console.error('Error validating token:', err);
+            return false;
         }
     }
 

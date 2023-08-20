@@ -1,25 +1,31 @@
 import express, { Request, Response } from 'express';
 import { SectionController } from '../controllers/Section.controller';
+import { authenticateUser } from './Authenticator.route';
+import { Section } from '../models/Section.class';
 
-const app = express();
-const port = 3000;
+export const SectionRoute = express.Router();
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+SectionRoute.post('/', async (req: Request, res: Response) => {
+    const idUser = await authenticateUser(req, res);
 
-app.post('/sections', async (req: Request, res: Response) => {
+    if (typeof idUser != "number") return;
+
     const formData = req.body;
 
     if (!formData.name || !formData.temperature) {
         return res.status(400).json({ message: 'Missing required fields' });
     }
 
-    const section = await SectionController.createSection(formData);
+    const section = await SectionController.createSection(formData, idUser);
 
     res.status(201).json(section.json());
 });
 
-app.patch('/sections/:idSection', async (req: Request, res: Response) => {
+SectionRoute.patch('/:idSection', async (req: Request, res: Response) => {
+    const idUser = await authenticateUser(req, res);
+
+    if (typeof idUser != "number") return;
+
     const idSection = parseInt(req.params.idSection);
     const formData = req.body;
 
@@ -31,58 +37,70 @@ app.patch('/sections/:idSection', async (req: Request, res: Response) => {
         return res.status(400).json({ message: 'Missing required fields!' });
     }
 
-    const section = await SectionController.getSection(idSection);
+    const section = await getSection(res, idSection, idUser);
 
-    if (!section) {
-        return res.status(404).json({ message: 'Section not found!' });
-    }
+    if(!(section instanceof Section)) return;
 
     await SectionController.updateSection(section, formData);
-    
+
     res.status(200).json(section.json());
 });
 
-app.delete('/sections/:idSection', async (req: Request, res: Response) => {
+SectionRoute.delete('/:idSection', async (req: Request, res: Response) => {
+    const idUser = await authenticateUser(req, res);
+
+    if (typeof idUser != "number") return;
+
     const idSection = parseInt(req.params.idSection);
 
     if (isNaN(idSection)) {
         return res.status(404).json({ message: 'Invalid idSection!' });
     }
 
-    const section = await SectionController.getSection(idSection);
+    const section = await getSection(res, idSection, idUser);
 
-    if (!section) {
-        return res.status(404).json({ message: 'Section not found!' });
-    }
+    if(!(section instanceof Section)) return;
 
-    await SectionController.deleteSection(section);
+    await SectionController.deleteSection(section, idUser);
 
     res.status(200).json(section.json());
 });
 
-app.get('/sections/:idSection/messages', async (req: Request, res: Response) => {
+SectionRoute.get('/:idSection/messages', async (req: Request, res: Response) => {
+    const idUser = await authenticateUser(req, res);
+
+    if (typeof idUser != "number") return;
+
     const idSection = parseInt(req.params.idSection);
     if (isNaN(idSection)) {
         return res.status(404).json({ message: 'Invalid idSection!' });
     }
 
-    const section = await SectionController.getSection(idSection);
+    const section = await getSection(res, idSection, idUser);
 
-    if(!section) {
-        return res.status(404).json({ message: 'Section not found!' });
-    }
+    if(!(section instanceof Section)) return;
 
     const messages = await SectionController.getMessages(section);
 
     res.status(200).json(messages);
 });
 
-app.get('/sections', async (req: Request, res: Response) => {
-    const sections = await SectionController.getSections();
+SectionRoute.get('/', async (req: Request, res: Response) => {
+    const idUser = await authenticateUser(req, res);
+
+    if (typeof idUser != "number") return;
+
+    const sections = await SectionController.getSections(idUser);
 
     res.status(200).json(sections);
 });
 
-app.listen(port, () => {
-    console.log(`Server is running at http://localhost:${port}`);
-});
+export const getSection = async (res: Response, idSection: number, idUser: number) => {
+    const section = await SectionController.getSection(idSection, idUser);
+
+    if (!section) {
+        return res.status(404).json({ message: 'Section not found!' });
+    }
+
+    return section;
+}

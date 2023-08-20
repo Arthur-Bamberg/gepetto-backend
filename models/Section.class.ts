@@ -114,7 +114,9 @@ export class Section {
 
             FROM message
 
-            WHERE message.FK_idSection = ?
+            WHERE 
+				message.FK_idSection = ?
+				AND message.isActive = 1
         `;
 			const values = [this._idSection];
 			try {
@@ -158,7 +160,7 @@ export class Section {
 		}
 	}
 
-	public static async getAll(): Promise<any[] | null> {
+	public static async getAll(idUser: number): Promise<any[] | null> {
 		const sql = `
             SELECT 
 				section.idSection, 
@@ -173,14 +175,23 @@ export class Section {
 				message.isActive as messageIsActive
 
             FROM section
+				INNER JOIN userSection
+					ON section.idSection = userSection.FK_idSection
+
 				LEFT JOIN message
-					ON section.FK_idLastMessage = message.idMessage`;
+					ON section.FK_idLastMessage = message.idMessage
+					
+			WHERE 
+				userSection.FK_idUser = ?
+				AND section.isActive = 1`;
 
 		const connector = new Connector();
 
+		const values = [idUser];
+
 		try {
 			await connector.connect();
-			const rows = await connector.query(sql);
+			const rows = await connector.query(sql, values);
 			const sections:any[] = [];
 			
 			if (rows.length === 0) {
@@ -243,13 +254,51 @@ export class Section {
 		}
 	}
 
-	public static async getById(id: number): Promise<Section | null> {
+	public async addToUser(idUser: number): Promise<void> {
+        const sql = `
+            INSERT INTO userSection (FK_idUser, FK_idSection)
+            VALUES (?, ?)
+        `;
+        const values = [idUser, this.idSection];
+
+        try {
+            await this._connector.connect();
+            await this._connector.query(sql, values);
+        } catch (err) {
+            console.error('Error adding user to section:', err);
+        } finally {
+            await this._connector.disconnect();
+        }
+    }
+
+	public async removeFromUser(idUser: number): Promise<void> {
+        const sql = `
+            DELETE FROM userSection
+            WHERE FK_idUser = ? AND FK_idSection = ?
+        `;
+        const values = [idUser, this.idSection];
+
+        try {
+            await this._connector.connect();
+            await this._connector.query(sql, values);
+        } catch (err) {
+            console.error('Error removing section from user:', err);
+        } finally {
+            await this._connector.disconnect();
+        }
+    }
+
+	public static async getById(idSection: number, idUser: number): Promise<Section | null> {
 		const sql = `
             SELECT idSection, name, temperature, isActive
             FROM section
-            WHERE idSection = ?
+				INNER JOIN userSection
+					ON section.idSection = userSection.FK_idSection
+            WHERE 
+				idSection = ?
+				AND userSection.FK_idUser = ?
         `;
-		const values = [id];
+		const values = [idSection, idUser];
 
 		const connector = new Connector();
 

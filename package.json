@@ -2,9 +2,9 @@
   "name": "gepetto-backend",
   "version": "1.0.0",
   "description": "An API for change audio to text and reverse with ChatGPT API",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "npx sucrase-node index.ts"
   },
   "keywords": [],
   "author": "",

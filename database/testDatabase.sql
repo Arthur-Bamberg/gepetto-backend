@@ -19,22 +19,6 @@
 CREATE DATABASE IF NOT EXISTS `gepetto-test` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci */;
 USE `gepetto-test`;
 
--- Dumping structure for table gepetto-test.JWT
-CREATE TABLE IF NOT EXISTS `JWT` (
-  `idJWT` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `FK_idUser` int(11) unsigned NOT NULL,
-  `hashToken` varchar(255) NOT NULL,
-  `deviceId` varchar(255) NOT NULL,
-  `createdOn` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updatedOn` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `isExpired` tinyint(4) unsigned NOT NULL,
-  PRIMARY KEY (`idJWT`),
-  KEY `FK_User_JWT` (`FK_idUser`),
-  CONSTRAINT `FK_User_JWT` FOREIGN KEY (`FK_idUser`) REFERENCES `user` (`idUser`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- Dumping data for table gepetto-test.JWT: ~0 rows (approximately)
-
 -- Dumping structure for table gepetto-test.message
 CREATE TABLE IF NOT EXISTS `message` (
   `idMessage` int(11) unsigned NOT NULL AUTO_INCREMENT,
