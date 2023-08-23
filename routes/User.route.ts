@@ -11,9 +11,13 @@ UserRoute.post('/', async (req: Request, res: Response) => {
         return res.status(400).json({ message: 'Missing required fields' });
     }
 
-    const user = await UserController.createUser(formData);
+    if(!await UserController.emailIsUnique(formData.email)) {
+        return res.status(400).json({ message: 'Email already registered' });
+    }
 
-    res.status(201).json(user.json());
+    const token = await UserController.createUser(formData);
+
+    res.status(201).json({token});
 });
 
 UserRoute.patch('/', async (req: Request, res: Response) => {
@@ -36,9 +40,13 @@ UserRoute.patch('/', async (req: Request, res: Response) => {
         return res.status(404).json({ message: 'User not found!' });
     }
 
-    await UserController.updateUser(user, formData);
+    if(formData.email && formData.email != user.email && !await UserController.emailIsUnique(formData.email)) {
+        return res.status(400).json({ message: 'Email already registered!' });
+    }
 
-    res.status(200).json(user.json());
+    const token = await UserController.updateUser(user, formData);
+
+    res.status(200).json({token});
 });
 
 UserRoute.delete('/', async (req: Request, res: Response) => {

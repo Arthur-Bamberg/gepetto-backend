@@ -15,9 +15,7 @@ export class Authenticator {
 
         const payload = await User.updateAuthentication(userData);
 
-        const token = jwt.sign(payload, Authenticator.secretKey);
-
-        return token;
+        return this.signJWT(payload);
     }
 
     public static async validateToken(token: string): Promise<{ idUser: number, isValid: boolean } | void> {
@@ -37,5 +35,9 @@ export class Authenticator {
                 }
             });
         })
+    }
+
+    public static signJWT(payload: any): string {
+        return jwt.sign(payload, Authenticator.secretKey);
     }
 }

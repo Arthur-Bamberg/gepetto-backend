@@ -1,10 +1,11 @@
 import { User } from "../models/User.class";
+import { Authenticator } from "../models/Authenticator.class";
 
 export class UserController {
     public static async createUser(formData: any) {
         const user = new User(formData.name, formData.email, formData.password);
         await user.save();
-        return user;
+        return Authenticator.signJWT(user.json());
     }
 
     public static async updateUser(user: User, formData: any) {
@@ -25,6 +26,7 @@ export class UserController {
         }
 
         await user.update();
+        return Authenticator.signJWT(user.json());
     }
     
     public static async deleteUser(user: User) {
@@ -33,5 +35,9 @@ export class UserController {
 
     public static async getUser(idUser: number) {
         return await User.getById(idUser);
+    }
+
+    public static async emailIsUnique(email: string) {
+        return await User.emailIsUnique(email);
     }
 }
