@@ -325,7 +325,7 @@ export class Section {
 			name: this._name,
 			temperature: this._temperature,
 			isActive: this._isActive,
-			lastMessage: this._lastMessage?.json()
+			lastMessage: this._lastMessage?.json().content ?? ''
 		};
 	}
 }

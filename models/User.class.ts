@@ -224,9 +224,13 @@ export class User {
         const sql = `
             SELECT idUser
             FROM user
-            WHERE email = ? AND name = ? AND idUser = ? AND issuedAt = ? AND isActive = 1
+            WHERE email = ? AND name = ? AND idUser = ? AND isActive = 1
+            AND (
+                issuedAt = ?
+                OR issuedAt = ?
+            )
         `;
-        const values = [tokenData.email, tokenData.name, tokenData.idUser, new Date(tokenData.iat * 1000)];
+        const values = [tokenData.email, tokenData.name, tokenData.idUser, new Date(tokenData.iat * 1000), new Date((tokenData.iat + 1) * 1000)];
 
         const connector = new Connector();
 
