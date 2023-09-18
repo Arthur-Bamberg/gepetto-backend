@@ -70,6 +70,29 @@ CREATE TABLE IF NOT EXISTS `userSection` (
   CONSTRAINT `userSection_ibfk_2` FOREIGN KEY (`FK_idSection`) REFERENCES `section` (`idSection`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+CREATE TABLE IF NOT EXISTS `userSection_history` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `FK_idUser` int(11) unsigned NOT NULL,
+  `FK_idSection` int(11) unsigned NOT NULL,
+  `action` enum('INSERT','UPDATE','DELETE') NOT NULL,
+  `timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS `message_history` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `idMessage` int(11) unsigned NOT NULL,
+  `type` enum('PROMPT','ANSWER') NOT NULL,
+  `content` varchar(500) NOT NULL,
+  `FK_idSection` int(11) unsigned NOT NULL,
+  `isAlternativeAnswer` tinyint(1) unsigned NOT NULL,
+  `isActive` tinyint(1) unsigned NOT NULL,
+  `action` enum('INSERT','UPDATE','DELETE') NOT NULL,
+  `timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
 -- Dumping data for table gepetto.userSection: ~0 rows (approximately)
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
