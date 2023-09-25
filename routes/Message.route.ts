@@ -13,7 +13,7 @@ MessageRoute.post('/', async (req: Request, res: Response) => {
 
     const formData = req.body;
 
-    if (!formData.type || !formData.content || !formData.idSection) {
+    if (!formData.content || !formData.idSection) {
         return res.status(400).json({ message: 'Missing required fields' });
     }
 
@@ -23,26 +23,28 @@ MessageRoute.post('/', async (req: Request, res: Response) => {
 
     const message = await MessageController.createMessage(formData);
 
-    res.status(201).json(message.json());
+    if(message) {
+        res.status(201).json(message.json());
+    }
 });
 
-MessageRoute.patch('/:idMessage', async (req: Request, res: Response) => {
+MessageRoute.patch('/:guidMessage', async (req: Request, res: Response) => {
     const idUser = await authenticateUser(req, res);
 
     if (typeof idUser != "number") return;
 
-    const idMessage = parseInt(req.params.idMessage);
+    const guidMessage = req.params.guidMessage;
     const formData = req.body;
 
-    if (isNaN(idMessage)) {
-        return res.status(404).json({ message: 'Invalid idMessage!' });
+    if (guidMessage.length != 36) {
+        return res.status(404).json({ message: 'Invalid guidMessage!' });
     }
 
     if (!formData.content && !formData.isAlternativeAnswer && !formData.isActive) {
         return res.status(400).json({ message: 'Missing required fields!' });
     }
 
-    const message = await MessageController.getMessage(idMessage);
+    const message = await MessageController.getMessage(guidMessage);
 
     if (!message) {
         return res.status(404).json({ message: 'Message not found!' });
@@ -57,16 +59,16 @@ MessageRoute.patch('/:idMessage', async (req: Request, res: Response) => {
     res.status(200).json(message.json());
 });
 
-MessageRoute.delete('/:idMessage', async (req: Request, res: Response) => {
+MessageRoute.delete('/:guidMessage', async (req: Request, res: Response) => {
     const idUser = await authenticateUser(req, res);
 
     if (typeof idUser != "number") return;
 
-    const idMessage = parseInt(req.params.idMessage);
-    if (isNaN(idMessage)) {
-        return res.status(404).json({ message: 'Invalid idMessage!' });
+    const guidMessage = req.params.guidMessage;
+    if (guidMessage.length != 36) {
+        return res.status(404).json({ message: 'Invalid guidMessage!' });
     }
-    const message = await MessageController.getMessage(idMessage);
+    const message = await MessageController.getMessage(guidMessage);
 
     if (!message) {
         return res.status(404).json({ message: 'Message not found!' });

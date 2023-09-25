@@ -1,14 +1,15 @@
-import { Message } from "../models/Message.class";
+import { Message, Type } from "../models/Message.class";
 
 export class MessageController {
-    public static async createMessage(formData: any): Promise<Message> {
-        const message = new Message(formData.content, formData.type, formData.idSection, formData.isAlternativeAnswer ?? 0, formData.isActive ?? 1);
-        await message.save();
-        return message;
+    public static async createMessage(formData: any): Promise<Message| void> {
+        const message = new Message(formData.content, Type.PROMPT, formData.idSection, formData.isAlternativeAnswer ?? 0);
+        const answer = message.saveAndGetAnswer();
+
+        return answer;
     }
 
-    public static async getMessage(idMessage: number): Promise<Message | null> {
-        return await Message.getById(idMessage);
+    public static async getMessage(guidMessage: string): Promise<Message | null> {
+        return await Message.getByGuid(guidMessage);
     }
 
     public static async updateMessage(message: Message, formData: any): Promise<void> {

@@ -1,4 +1,6 @@
+import { v4 as uuidv4 } from 'uuid';
 import { Connector } from "../utils/Connector";
+import { ChatGPT } from "./ChatGPT.class";
 
 export enum Type {
     PROMPT = 'PROMPT',
@@ -6,7 +8,7 @@ export enum Type {
 }
 
 export class Message {
-    private _idMessage?: number;
+    private _guidMessage?: string;
     private _content?: string;
     private _type?: Type;
     private _FK_idSection?: number;
@@ -19,10 +21,10 @@ export class Message {
         type: Type,
         FK_idSection: number,
         isAlternativeAnswer?: boolean,
-        idMessage?: number,
+        guidMessage?: string,
         isActive?: boolean
     ) {
-        this.idMessage = idMessage;
+        this.guidMessage = guidMessage;
         this.content = content;
         this.type = type;
         this.FK_idSection = FK_idSection;
@@ -31,15 +33,16 @@ export class Message {
         this._connector = new Connector();
     }
 
-    get idMessage(): number | undefined {
-        return this._idMessage;
+    get guidMessage(): string | undefined {
+        return this.formatGuid(this._guidMessage);
     }
 
-    set idMessage(value: number | undefined) {
-        if (value === undefined || value >= 0) {
-            this._idMessage = value;
+    set guidMessage(value: string | undefined) {
+        if(value !== undefined) {
+            this._guidMessage = value.replace(/-/g, '');
+
         } else {
-            throw new Error('Invalid value for idMessage');
+            this._guidMessage = value;
         }
     }
 
@@ -87,12 +90,36 @@ export class Message {
         this._isActive = value;
     }
 
-    public async save(): Promise<void> {
+    public async saveAndGetAnswer(): Promise<Message | void> {
+        try {
+            if (!this._content) {
+                throw new Error('Missing content');   
+            }
+            const lastMessage = await this.getLastMessageContent(this._FK_idSection ?? 0);
+
+            const content = await ChatGPT.getAnswer(this._content, lastMessage);
+
+            this.guidMessage = uuidv4();
+
+            const answerGuid = uuidv4();
+
+            this.save(answerGuid.replace(/-/g, ''), content);
+
+            const message = new Message(content, Type.ANSWER, this._FK_idSection ?? 0, this._isAlternativeAnswer, answerGuid);
+
+            return message;
+        } catch (error) {
+            console.error('Error getting answer:', error);
+        }
+    }
+
+    private async save(answerGuid: string, answerContent: string): Promise<void> {
         const messageSql = `
-            INSERT INTO message (content, type, FK_idSection, isAlternativeAnswer, isActive)
-            VALUES (?, ?, ?, ?, ?);
+            INSERT INTO message (guidMessage, content, type, FK_idSection, isAlternativeAnswer, isActive)
+            VALUES (?, ?, ?, ?, ?, ?);
         `;
         const messageValues = [
+            this._guidMessage,
             this._content,
             this._type,
             this._FK_idSection,
@@ -101,20 +128,37 @@ export class Message {
             this._FK_idSection
         ];
 
+        const answerValues = [
+            answerGuid,
+            answerContent,
+            Type.ANSWER,
+            this._FK_idSection,
+            this._isAlternativeAnswer,
+            this._isActive,
+            this._FK_idSection
+        ];
+
         const sectionSql = `
             UPDATE section
-            SET FK_idLastMessage = LAST_INSERT_ID()
+            SET FK_guidLastMessage = ?
             WHERE idSection = ?;
         `;
 
-        const sectionValues = [this._FK_idSection];
+        const sectionValues = [this._guidMessage, this._FK_idSection];
+
         try {
-            await this._connector.connect();
+            await this._connector.beginTransaction();
+
             await this._connector.query(messageSql, messageValues);
-            this._idMessage = await this._connector.getLastInsertedId();
 
             await this._connector.query(sectionSql, sectionValues);
+
+            await this._connector.query(messageSql, answerValues);
+
+            await this._connector.commit();
+
         } catch (err) {
+            await this._connector.rollback();
             console.error('Error saving message:', err);
         } finally {
             await this._connector.disconnect();
@@ -125,7 +169,7 @@ export class Message {
         const sql = `
             UPDATE message
             SET content = ?, type = ?, FK_idSection = ?, isAlternativeAnswer = ?, isActive = ?
-            WHERE idMessage = ?
+            WHERE guidMessage = ?
         `;
         const values = [
             this._content,
@@ -133,7 +177,7 @@ export class Message {
             this._FK_idSection,
             this._isAlternativeAnswer,
             this._isActive,
-            this._idMessage
+            this._guidMessage
         ];
         try {
             await this._connector.connect();
@@ -149,9 +193,9 @@ export class Message {
         const sql = `
             UPDATE message
             SET isActive = 0
-            WHERE idMessage = ?
+            WHERE guidMessage = ?
         `;
-        const values = [this._idMessage];
+        const values = [this._guidMessage];
         try {
             await this._connector.connect();
             await this._connector.query(sql, values);
@@ -163,11 +207,11 @@ export class Message {
         }
     }
 
-    public static async getById(id: number): Promise<Message | null> {
+    public static async getByGuid(id: string): Promise<Message | null> {
         const sql = `
-            SELECT idMessage, content, type, FK_idSection, isAlternativeAnswer, isActive
+            SELECT guidMessage, content, type, FK_idSection, isAlternativeAnswer, isActive
             FROM message
-            WHERE idMessage = ?
+            WHERE guidMessage = ?
         `;
         const values = [id];
 
@@ -185,7 +229,7 @@ export class Message {
                 row.type,
                 row.FK_idSection,
                 row.isAlternativeAnswer,
-                row.idMessage,
+                row.guidMessage,
                 row.isActive
             );
             return message;
@@ -197,9 +241,51 @@ export class Message {
         }
     }
 
+    private async getLastMessageContent(idSection: number): Promise<string | null> {
+        const sql = `
+            SELECT 
+                message.content
+            FROM message
+                INNER JOIN section 
+                    ON message.guidMessage = section.FK_guidLastMessage
+            WHERE 
+                section.idSection = ?
+        `;
+        const values = [idSection];
+
+        try {
+            await this._connector.connect();
+
+            const rows = await this._connector.query(sql, values);
+            if (rows.length === 0) {
+                return null;
+            }
+            return rows[0].content;
+        } catch (err) {
+            console.error('Error getting last message content:', err);
+            return null;
+        }
+    }
+
+    private formatGuid(guid: string | undefined) {
+        if (guid !== undefined && guid.length === 32) {
+          return (
+            guid.substring(0, 8) +
+            '-' +
+            guid.substring(8, 12) +
+            '-' +
+            guid.substring(12, 16) +
+            '-' +
+            guid.substring(16, 20) +
+            '-' +
+            guid.substring(20)
+          );
+        }
+    }
+
     public json() {
         return {
-            idMessage: this.idMessage,
+            guidMessage: this.guidMessage,
             content: this.content,
             type: this.type,
             idSection: this.FK_idSection,

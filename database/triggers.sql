@@ -24,9 +24,11 @@ DELIMITER ;
 
 DELIMITER //
 
+DELIMITER //
 CREATE TRIGGER `message_after_insert` AFTER INSERT ON `message` FOR EACH ROW
 BEGIN
-  INSERT INTO `message_history` (`idMessage`, `type`, `content`, `FK_idSection`, `isAlternativeAnswer`, `isActive`, `action`) VALUES (NEW.`idMessage`, NEW.`type`, NEW.`content`, NEW.`FK_idSection`, NEW.`isAlternativeAnswer`, NEW.`isActive`, 'INSERT');
+  INSERT INTO `message_history` (`guidMessage`, `type`, `content`, `FK_idSection`, `isAlternativeAnswer`, `isActive`, `action`)
+  VALUES (NEW.`guidMessage`, NEW.`type`, NEW.`content`, NEW.`FK_idSection`, NEW.`isAlternativeAnswer`, NEW.`isActive`, 'INSERT');
 END;
 //
 DELIMITER ;
@@ -34,7 +36,8 @@ DELIMITER ;
 DELIMITER //
 CREATE TRIGGER `message_after_update` AFTER UPDATE ON `message` FOR EACH ROW
 BEGIN
-  INSERT INTO `message_history` (`idMessage`, `type`, `content`, `FK_idSection`, `isAlternativeAnswer`, `isActive`, `action`) VALUES (NEW.`idMessage`, NEW.`type`, NEW.`content`, NEW.`FK_idSection`, NEW.`isAlternativeAnswer`, NEW.`isActive`, 'UPDATE');
+  INSERT INTO `message_history` (`guidMessage`, `type`, `content`, `FK_idSection`, `isAlternativeAnswer`, `isActive`, `action`)
+  VALUES (NEW.`guidMessage`, NEW.`type`, NEW.`content`, NEW.`FK_idSection`, NEW.`isAlternativeAnswer`, NEW.`isActive`, 'UPDATE');
 END;
 //
 DELIMITER ;
@@ -42,7 +45,8 @@ DELIMITER ;
 DELIMITER //
 CREATE TRIGGER `message_after_delete` AFTER DELETE ON `message` FOR EACH ROW
 BEGIN
-  INSERT INTO `message_history` (`idMessage`, `type`, `content`, `FK_idSection`, `isAlternativeAnswer`, `isActive`, `action`) VALUES (OLD.`idMessage`, OLD.`type`, OLD.`content`, OLD.`FK_idSection`, OLD.`isAlternativeAnswer`, OLD.`isActive`, 'DELETE');
+  INSERT INTO `message_history` (`guidMessage`, `type`, `content`, `FK_idSection`, `isAlternativeAnswer`, `isActive`, `action`)
+  VALUES (OLD.`guidMessage`, OLD.`type`, OLD.`content`, OLD.`FK_idSection`, OLD.`isAlternativeAnswer`, OLD.`isActive`, 'DELETE');
 END;
 //
 DELIMITER ;

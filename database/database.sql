@@ -1,8 +1,8 @@
 -- --------------------------------------------------------
 -- Host:                         127.0.0.1
--- Server version:               10.4.27-MariaDB - mariadb.org binary distribution
+-- Server version:               5.7.25 - MySQL Community Server (GPL)
 -- Server OS:                    Win64
--- HeidiSQL Version:             12.4.0.6659
+-- HeidiSQL Version:             12.5.0.6677
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -16,37 +16,53 @@
 
 
 -- Dumping database structure for gepetto
-CREATE DATABASE IF NOT EXISTS `gepetto` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci */;
+CREATE DATABASE IF NOT EXISTS `gepetto` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
 USE `gepetto`;
 
 -- Dumping structure for table gepetto.message
 CREATE TABLE IF NOT EXISTS `message` (
-  `idMessage` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `guidMessage` char(32) NOT NULL DEFAULT 'AUTO_INCREMENT',
   `type` enum('PROMPT','ANSWER') NOT NULL,
   `content` varchar(500) NOT NULL,
   `FK_idSection` int(11) unsigned NOT NULL,
   `isAlternativeAnswer` tinyint(1) unsigned NOT NULL,
   `isActive` tinyint(1) unsigned NOT NULL,
-  PRIMARY KEY (`idMessage`),
+  PRIMARY KEY (`guidMessage`) USING BTREE,
   KEY `FK_idSection` (`FK_idSection`),
   CONSTRAINT `message_ibfk_1` FOREIGN KEY (`FK_idSection`) REFERENCES `section` (`idSection`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Dumping data for table gepetto.message: ~0 rows (approximately)
+-- Data exporting was unselected.
+
+-- Dumping structure for table gepetto.message_history
+CREATE TABLE IF NOT EXISTS `message_history` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `guidMessage` char(32) NOT NULL DEFAULT '',
+  `type` enum('PROMPT','ANSWER') NOT NULL,
+  `content` varchar(500) NOT NULL,
+  `FK_idSection` int(11) unsigned NOT NULL,
+  `isAlternativeAnswer` tinyint(1) unsigned NOT NULL,
+  `isActive` tinyint(1) unsigned NOT NULL,
+  `action` enum('INSERT','UPDATE','DELETE') NOT NULL,
+  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Data exporting was unselected.
 
 -- Dumping structure for table gepetto.section
 CREATE TABLE IF NOT EXISTS `section` (
   `idSection` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `temperature` float unsigned NOT NULL,
   `name` varchar(50) NOT NULL,
-  `FK_idLastMessage` int(11) unsigned DEFAULT NULL,
+  `FK_guidLastMessage` char(32) DEFAULT NULL,
   `isActive` tinyint(1) unsigned NOT NULL,
   PRIMARY KEY (`idSection`),
-  KEY `FK_idLastMessage` (`FK_idLastMessage`),
-  CONSTRAINT `section_ibfk_1` FOREIGN KEY (`FK_idLastMessage`) REFERENCES `message` (`idMessage`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  KEY `FK_guidLastMessage` (`FK_guidLastMessage`),
+  CONSTRAINT `FK_guidLastMessage` FOREIGN KEY (`FK_guidLastMessage`) REFERENCES `message` (`guidMessage`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Dumping data for table gepetto.section: ~0 rows (approximately)
+-- Data exporting was unselected.
 
 -- Dumping structure for table gepetto.user
 CREATE TABLE IF NOT EXISTS `user` (
@@ -54,11 +70,11 @@ CREATE TABLE IF NOT EXISTS `user` (
   `name` varchar(50) NOT NULL,
   `email` varchar(50) NOT NULL,
   `password` varchar(50) NOT NULL,
-  `isActive` tinyint(1) unsigned NOT NULL DEFAULT 1,
+  `isActive` tinyint(1) unsigned NOT NULL DEFAULT '1',
   PRIMARY KEY (`idUser`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Dumping data for table gepetto.user: ~0 rows (approximately)
+-- Data exporting was unselected.
 
 -- Dumping structure for table gepetto.userSection
 CREATE TABLE IF NOT EXISTS `userSection` (
@@ -68,32 +84,21 @@ CREATE TABLE IF NOT EXISTS `userSection` (
   KEY `FK_idSection` (`FK_idSection`),
   CONSTRAINT `userSection_ibfk_1` FOREIGN KEY (`FK_idUser`) REFERENCES `user` (`idUser`),
   CONSTRAINT `userSection_ibfk_2` FOREIGN KEY (`FK_idSection`) REFERENCES `section` (`idSection`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Data exporting was unselected.
+
+-- Dumping structure for table gepetto.userSection_history
 CREATE TABLE IF NOT EXISTS `userSection_history` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `FK_idUser` int(11) unsigned NOT NULL,
   `FK_idSection` int(11) unsigned NOT NULL,
   `action` enum('INSERT','UPDATE','DELETE') NOT NULL,
-  `timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS `message_history` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `idMessage` int(11) unsigned NOT NULL,
-  `type` enum('PROMPT','ANSWER') NOT NULL,
-  `content` varchar(500) NOT NULL,
-  `FK_idSection` int(11) unsigned NOT NULL,
-  `isAlternativeAnswer` tinyint(1) unsigned NOT NULL,
-  `isActive` tinyint(1) unsigned NOT NULL,
-  `action` enum('INSERT','UPDATE','DELETE') NOT NULL,
-  `timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-
--- Dumping data for table gepetto.userSection: ~0 rows (approximately)
+-- Data exporting was unselected.
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;

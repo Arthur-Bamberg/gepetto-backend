@@ -52,7 +52,7 @@ export class Section {
 		if (this._lastMessage === undefined) {
 			const sql = `
             SELECT 
-                message.idMessage, 
+                message.guidMessage, 
                 message.content, 
                 message.type, 
                 message.isAlternativeAnswer, 
@@ -62,7 +62,7 @@ export class Section {
             FROM message
 
 			INNER JOIN section 
-				ON section.FK_idLastMessage = message.idMessage
+				ON section.FK_guidLastMessage = message.guidMessage
 
             WHERE section.idSection = ?
         `;
@@ -75,7 +75,7 @@ export class Section {
 					return null;
 				}
 
-				const message = new Message(rows[0].content, rows[0].type, rows[0].FK_idSection, rows[0].isAlternativeAnswer, rows[0].isActive, rows[0].idMessage);
+				const message = new Message(rows[0].content, rows[0].type, rows[0].FK_idSection, rows[0].isAlternativeAnswer, rows[0].isActive, rows[0].guidMessage);
 
 				this._lastMessage = message;
 			} catch (err) {
@@ -105,7 +105,7 @@ export class Section {
 		if (this._messages === undefined) {
 			const sql = `
             SELECT 
-                message.idMessage, 
+                message.guidMessage, 
                 message.content, 
                 message.type, 
                 message.isAlternativeAnswer, 
@@ -129,7 +129,7 @@ export class Section {
 
 				const messages = [];
 				for (const row of rows) {
-					messages.push(new Message(row.content, row.type, row.FK_idSection, row.isAlternativeAnswer, row.idMessage, row.isActive).json());
+					messages.push(new Message(row.content, row.type, row.FK_idSection, row.isAlternativeAnswer, row.guidMessage, row.isActive).json());
 				}
 				this._messages = messages;
 			} catch (err) {
@@ -168,7 +168,7 @@ export class Section {
 				section.temperature, 
 				section.isActive,
 
-				message.idMessage,
+				message.guidMessage,
 				message.content,
 				message.type,
 				message.isAlternativeAnswer,
@@ -179,7 +179,7 @@ export class Section {
 					ON section.idSection = userSection.FK_idSection
 
 				LEFT JOIN message
-					ON section.FK_idLastMessage = message.idMessage
+					ON section.FK_guidLastMessage = message.guidMessage
 					
 			WHERE 
 				userSection.FK_idUser = ?
@@ -199,8 +199,8 @@ export class Section {
 			}
 
 			rows.forEach((row) => {
-				if(row.idMessage !== null) {
-					const message = new Message(row.content, row.type, row.idSection, row.isAlternativeAnswer, row.idMessage, row.messageIsActive);	
+				if(row.guidMessage !== null) {
+					const message = new Message(row.content, row.type, row.idSection, row.isAlternativeAnswer, row.guidMessage, row.messageIsActive);	
 
 					sections.push(new Section(row.name, row.temperature, row.idSection, row.isActive, message).json());
 				} else {

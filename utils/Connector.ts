@@ -4,33 +4,66 @@ dotenv.config();
 
 export class Connector {
     private connection: any;
+    private isConnected: boolean = false;
 
     constructor() {
-        if(process.env.HOST && process.env.USER && process.env.DATABASE) {
-            this.connection = createConnection({
-                host: process.env.HOST,
-                user: process.env.USER,
-                password: process.env.PASSWORD,
-                database: process.env.DATABASE
-            });
-        } else { //testDatabase
-            this.connection = createConnection({
-                host: 'localhost',
-                user: 'root',
-                password: 'pelota',
-                database: 'gepetto-test'
-            });
-        }
+        this.connection = createConnection({
+            host: process.env.HOST,
+            user: process.env.USER,
+            password: process.env.PASSWORD,
+            database: process.env.DATABASE
+        });
     }
 
     public connect(): Promise<void> {
         return new Promise<void>((resolve, reject) => {
-            this.connection.connect((err: QueryError) => {
+            if(!this.isConnected) {
+                this.connection.connect((err: QueryError) => {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+                    this.isConnected = true;
+                    resolve();
+                });
+            } else {
+                resolve();
+            }
+        });
+    }
+
+    public async beginTransaction(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.connection.beginTransaction((err: object) => {
                 if (err) {
                     reject(err);
-                    return;
+                } else {
+                    resolve();
                 }
-                resolve();
+            });
+        });
+    }
+
+    public async commit(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.connection.commit((err: object) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
+    }
+
+    public async rollback(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.connection.rollback((err: object) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
             });
         });
     }
@@ -66,18 +99,18 @@ export class Connector {
 
     public disconnect(): Promise<void> {
         return new Promise<void>((resolve, reject) => {
-            if (this.connection.state === 'disconnected' || !this.connection._protocol) {
+            if(this.isConnected) {
+                this.connection.end((err: QueryError) => {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+                    this.isConnected = false;
+                    resolve();
+                });
+            } else {
                 resolve();
-                return;
             }
-
-            this.connection.end((err: QueryError) => {
-                if (err) {
-                    reject(err);
-                    return;
-                }
-                resolve();
-            });
         });
     }
 }
