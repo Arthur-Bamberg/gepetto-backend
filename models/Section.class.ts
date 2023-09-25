@@ -117,6 +117,8 @@ export class Section {
             WHERE 
 				message.FK_idSection = ?
 				AND message.isActive = 1
+
+			ORDER BY message.createdOn ASC, message.type ASC
         `;
 			const values = [this._idSection];
 			try {
@@ -143,20 +145,30 @@ export class Section {
 		return this._messages;
 	}
 
-	public async save(): Promise<void> {
+	public async create(idUser: number): Promise<void> {
+		await this._connector.connect();
+		await this._connector.beginTransaction();
+
+		await this.save();
+		this.addToUser(idUser).then(
+			async ()=> {
+				await this._connector.commit();
+				await this._connector.disconnect();
+			} 
+		);
+	}
+
+	private async save(): Promise<void> {
 		const sql = `
             INSERT INTO section (name, temperature, isActive)
             VALUES (?, ?, ?)
         `;
 		const values = [this._name, this._temperature, this._isActive];
 		try {
-			await this._connector.connect();
 			await this._connector.query(sql, values);
-			this._idSection = await this._connector.getLastInsertedId();
+			this._idSection = this._connector.getLastInsertedId();
 		} catch (err) {
 			console.error('Error saving section:', err);
-		} finally {
-			await this._connector.disconnect();
 		}
 	}
 
@@ -254,7 +266,7 @@ export class Section {
 		}
 	}
 
-	public async addToUser(idUser: number): Promise<void> {
+	private async addToUser(idUser: number): Promise<void> {
         const sql = `
             INSERT INTO userSection (FK_idUser, FK_idSection)
             VALUES (?, ?)
@@ -266,8 +278,6 @@ export class Section {
             await this._connector.query(sql, values);
         } catch (err) {
             console.error('Error adding user to section:', err);
-        } finally {
-            await this._connector.disconnect();
         }
     }
 

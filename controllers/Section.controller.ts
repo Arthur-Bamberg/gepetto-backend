@@ -3,8 +3,7 @@ import { Section } from "../models/Section.class";
 export class SectionController {
     public static async createSection(formData: any, idUser: number): Promise<Section> {
         const section = new Section(formData.name, formData.temperature, formData.isActive ?? 1);
-        await section.save();
-        section.addToUser(idUser);
+        await section.create(idUser);
         return section;
     }
 

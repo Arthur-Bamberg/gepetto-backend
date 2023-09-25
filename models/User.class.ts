@@ -97,11 +97,11 @@ export class User {
         try {
             await this._connector.connect();
             await this._connector.query(sql, values);
-            this._idUser = await this._connector.getLastInsertedId();
+            this._idUser = this._connector.getLastInsertedId();
         } catch (err) {
             console.error('Error saving user:', err);
         } finally {
-            await this._connector.disconnect();
+            this._connector.disconnect();
         }
     }
 

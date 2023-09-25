@@ -5,6 +5,7 @@ dotenv.config();
 export class Connector {
     private connection: any;
     private isConnected: boolean = false;
+    private lastInsertedId: number = 0;
 
     constructor() {
         this.connection = createConnection({
@@ -70,31 +71,23 @@ export class Connector {
 
     public query(sql: string, values?: any[]): Promise<RowDataPacket[]> {
         return new Promise<RowDataPacket[]>((resolve, reject) => {
-            this.connection.query(sql, values, (err: QueryError, rows: RowDataPacket[]) => {
+            this.connection.query(sql, values, (err: QueryError, rows: any) => {
                 if (err) {
                     reject(err);
                     return;
                 }
+
+                if(rows.insertId) {
+                    this.lastInsertedId = rows.insertId;
+                }
+
                 resolve(rows);
             });
         });
     }
 
-    public getLastInsertedId(): Promise<number> {
-        return new Promise<number>((resolve, reject) => {
-            this.connection.query('SELECT LAST_INSERT_ID()', (err: QueryError, rows: RowDataPacket[]) => {
-                if (err) {
-                    reject(err);
-                    return;
-                }
-                if (rows.length === 0) {
-                    resolve(0);
-                } else {
-                    const lastInsertId = rows[0]['LAST_INSERT_ID()'];
-                    resolve(lastInsertId);
-                }
-            });
-        });
+    public getLastInsertedId(): number {
+        return this.lastInsertedId;
     }
 
     public disconnect(): Promise<void> {

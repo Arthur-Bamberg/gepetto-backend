@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS `message` (
   `FK_idSection` int(11) unsigned NOT NULL,
   `isAlternativeAnswer` tinyint(1) unsigned NOT NULL,
   `isActive` tinyint(1) unsigned NOT NULL,
+  `createdOn` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`guidMessage`) USING BTREE,
   KEY `FK_idSection` (`FK_idSection`),
   CONSTRAINT `message_ibfk_1` FOREIGN KEY (`FK_idSection`) REFERENCES `section` (`idSection`)
@@ -46,7 +47,7 @@ CREATE TABLE IF NOT EXISTS `message_history` (
   `action` enum('INSERT','UPDATE','DELETE') NOT NULL,
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4;
 
 -- Data exporting was unselected.
 
@@ -60,7 +61,7 @@ CREATE TABLE IF NOT EXISTS `section` (
   PRIMARY KEY (`idSection`),
   KEY `FK_guidLastMessage` (`FK_guidLastMessage`),
   CONSTRAINT `FK_guidLastMessage` FOREIGN KEY (`FK_guidLastMessage`) REFERENCES `message` (`guidMessage`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
 
 -- Data exporting was unselected.
 
@@ -71,8 +72,9 @@ CREATE TABLE IF NOT EXISTS `user` (
   `email` varchar(50) NOT NULL,
   `password` varchar(50) NOT NULL,
   `isActive` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `issuedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idUser`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
 
 -- Data exporting was unselected.
 
@@ -96,9 +98,72 @@ CREATE TABLE IF NOT EXISTS `userSection_history` (
   `action` enum('INSERT','UPDATE','DELETE') NOT NULL,
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
 
 -- Data exporting was unselected.
+
+-- Dumping structure for trigger gepetto.message_after_delete
+SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';
+DELIMITER //
+CREATE TRIGGER `message_after_delete` AFTER DELETE ON `message` FOR EACH ROW
+BEGIN
+  INSERT INTO `message_history` (`guidMessage`, `type`, `content`, `FK_idSection`, `isAlternativeAnswer`, `isActive`, `action`)
+  VALUES (OLD.`guidMessage`, OLD.`type`, OLD.`content`, OLD.`FK_idSection`, OLD.`isAlternativeAnswer`, OLD.`isActive`, 'DELETE');
+END//
+DELIMITER ;
+SET SQL_MODE=@OLDTMP_SQL_MODE;
+
+-- Dumping structure for trigger gepetto.message_after_insert
+SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';
+DELIMITER //
+CREATE TRIGGER `message_after_insert` AFTER INSERT ON `message` FOR EACH ROW
+BEGIN
+  INSERT INTO `message_history` (`guidMessage`, `type`, `content`, `FK_idSection`, `isAlternativeAnswer`, `isActive`, `action`)
+  VALUES (NEW.`guidMessage`, NEW.`type`, NEW.`content`, NEW.`FK_idSection`, NEW.`isAlternativeAnswer`, NEW.`isActive`, 'INSERT');
+END//
+DELIMITER ;
+SET SQL_MODE=@OLDTMP_SQL_MODE;
+
+-- Dumping structure for trigger gepetto.message_after_update
+SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';
+DELIMITER //
+CREATE TRIGGER `message_after_update` AFTER UPDATE ON `message` FOR EACH ROW
+BEGIN
+  INSERT INTO `message_history` (`guidMessage`, `type`, `content`, `FK_idSection`, `isAlternativeAnswer`, `isActive`, `action`)
+  VALUES (NEW.`guidMessage`, NEW.`type`, NEW.`content`, NEW.`FK_idSection`, NEW.`isAlternativeAnswer`, NEW.`isActive`, 'UPDATE');
+END//
+DELIMITER ;
+SET SQL_MODE=@OLDTMP_SQL_MODE;
+
+-- Dumping structure for trigger gepetto.userSection_after_delete
+SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';
+DELIMITER //
+CREATE TRIGGER `userSection_after_delete` AFTER DELETE ON `userSection` FOR EACH ROW
+BEGIN
+  INSERT INTO `userSection_history` (`FK_idUser`, `FK_idSection`, `action`) VALUES (OLD.`FK_idUser`, OLD.`FK_idSection`, 'DELETE');
+END//
+DELIMITER ;
+SET SQL_MODE=@OLDTMP_SQL_MODE;
+
+-- Dumping structure for trigger gepetto.userSection_after_insert
+SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';
+DELIMITER //
+CREATE TRIGGER `userSection_after_insert` AFTER INSERT ON `userSection` FOR EACH ROW
+BEGIN
+  INSERT INTO `userSection_history` (`FK_idUser`, `FK_idSection`, `action`) VALUES (NEW.`FK_idUser`, NEW.`FK_idSection`, 'INSERT');
+END//
+DELIMITER ;
+SET SQL_MODE=@OLDTMP_SQL_MODE;
+
+-- Dumping structure for trigger gepetto.userSection_after_update
+SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';
+DELIMITER //
+CREATE TRIGGER `userSection_after_update` AFTER UPDATE ON `userSection` FOR EACH ROW
+BEGIN
+  INSERT INTO `userSection_history` (`FK_idUser`, `FK_idSection`, `action`) VALUES (NEW.`FK_idUser`, NEW.`FK_idSection`, 'UPDATE');
+END//
+DELIMITER ;
+SET SQL_MODE=@OLDTMP_SQL_MODE;
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
