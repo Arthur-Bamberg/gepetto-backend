@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Connector } from "../utils/Connector";
-import { ChatGPT } from "./ChatGPT.class";
+import { GPTConnector } from './GPTConnector.class';
 
 export enum Type {
     PROMPT = 'PROMPT',
@@ -97,7 +97,9 @@ export class Message {
             }
             const lastMessage = await this.getLastMessageContent(this._FK_idSection ?? 0);
 
-            const content = await ChatGPT.getAnswer(this._content, lastMessage);
+            const AIConnector: GPTConnector = new GPTConnector();
+
+            const content = await AIConnector.sendPrompt(lastMessage ?? '', 0.8, this._content) ?? '';
 
             this.guidMessage = uuidv4();
 

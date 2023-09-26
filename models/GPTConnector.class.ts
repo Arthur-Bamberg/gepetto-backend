@@ -2,7 +2,7 @@ import { Configuration, OpenAIApi, CreateCompletionRequest } from 'openai';
 import dotenv from 'dotenv';
 dotenv.config();
 
-class GPTConnector {
+export class GPTConnector {
     private readonly api: OpenAIApi;
     private readonly delayMs: number;
 
@@ -15,7 +15,7 @@ class GPTConnector {
     }
 
     async sendPrompt(context: string, temperature: number, prompt: string): Promise<string | undefined> {
-        const gptPrompt = `Context: ${context}\nPrompt: ${prompt}\n`;
+        const gptPrompt = `Pergunta anterior: ${context}\nPrompt: ${prompt}\n`;
 
         try {
             const request: CreateCompletionRequest = {
@@ -56,12 +56,3 @@ class GPTConnector {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 }
-
-async function main() {
-    const gptConnector = new GPTConnector();
-    const gptResponse = await gptConnector.sendPrompt('Hello', 0.5, 'Hello, how are you?');
-
-    console.log(gptResponse);
-}
-
-main();
