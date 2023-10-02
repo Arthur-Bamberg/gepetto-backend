@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS `message_history` (
   `action` enum('INSERT','UPDATE','DELETE') NOT NULL,
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Data exporting was unselected.
 
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS `section` (
   PRIMARY KEY (`idSection`),
   KEY `FK_guidLastMessage` (`FK_guidLastMessage`),
   CONSTRAINT `FK_guidLastMessage` FOREIGN KEY (`FK_guidLastMessage`) REFERENCES `message` (`guidMessage`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Data exporting was unselected.
 
@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   `isActive` tinyint(1) unsigned NOT NULL DEFAULT '1',
   `issuedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idUser`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Data exporting was unselected.
 
@@ -98,7 +98,7 @@ CREATE TABLE IF NOT EXISTS `userSection_history` (
   `action` enum('INSERT','UPDATE','DELETE') NOT NULL,
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Data exporting was unselected.
 
