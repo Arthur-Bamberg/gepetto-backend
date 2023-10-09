@@ -162,8 +162,6 @@ export class Message {
         } catch (err) {
             await this._connector.rollback();
             console.error('Error saving message:', err);
-        } finally {
-            await this._connector.disconnect();
         }
     }
 
@@ -186,8 +184,6 @@ export class Message {
             await this._connector.query(sql, values);
         } catch (err) {
             console.error('Error updating message:', err);
-        } finally {
-            await this._connector.disconnect();
         }
     }
 
@@ -204,8 +200,6 @@ export class Message {
             this.isActive = false;
         } catch (err) {
             console.error('Error deleting message:', err);
-        } finally {
-            await this._connector.disconnect();
         }
     }
 
@@ -238,8 +232,6 @@ export class Message {
         } catch (err) {
             console.error('Error fetching message by ID:', err);
             return null;
-        } finally {
-            await connector.disconnect();
         }
     }
 

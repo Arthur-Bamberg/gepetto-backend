@@ -100,8 +100,6 @@ export class User {
             this._idUser = this._connector.getLastInsertedId();
         } catch (err) {
             console.error('Error saving user:', err);
-        } finally {
-            this._connector.disconnect();
         }
     }
 
@@ -119,8 +117,6 @@ export class User {
             await this._connector.query(sql, values);
         } catch (err) {
             console.error('Error updating user:', err);
-        } finally {
-            await this._connector.disconnect();
         }
     }
 
@@ -137,8 +133,6 @@ export class User {
             this.isActive = false;
         } catch (err) {
             console.error('Error deleting user:', err);
-        } finally {
-            await this._connector.disconnect();
         }
     }
 
@@ -164,8 +158,6 @@ export class User {
         } catch (err) {
             console.error('Error fetching user by ID:', err);
             return null;
-        } finally {
-            await connector.disconnect();
         }
     }
 
@@ -191,8 +183,6 @@ export class User {
         } catch (err) {
             console.error('Error validating user login:', err);
             return null;
-        } finally {
-            await connector.disconnect();
         }
     }
 
@@ -215,8 +205,6 @@ export class User {
             return userData;
         } catch (err) {
             console.error('Error updating authentication:', err);
-        } finally {
-            await connector.disconnect();
         }
     }
 

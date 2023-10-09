@@ -13,6 +13,11 @@ COPY utils ./utils
 
 RUN yarn dist
 
+RUN rm -rf ./controllers
+RUN rm -rf ./models
+RUN rm -rf ./routes
+RUN rm -rf ./utils
+
 EXPOSE 80
 
 CMD ["yarn", "run-dist"]

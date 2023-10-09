@@ -1,4 +1,5 @@
 import express, { Request, Response } from 'express';
+import { Connector } from '../utils/Connector';
 import { SectionController } from '../controllers/Section.controller';
 import { authenticateUser } from './Authenticator.route';
 import { Section } from '../models/Section.class';
@@ -6,93 +7,132 @@ import { Section } from '../models/Section.class';
 export const SectionRoute = express.Router();
 
 SectionRoute.post('/', async (req: Request, res: Response) => {
-    const idUser = await authenticateUser(req, res);
+    try {
+        const idUser = await authenticateUser(req, res);
 
-    if (typeof idUser != "number") return;
+        if (typeof idUser != "number") return;
 
-    const formData = req.body;
+        const formData = req.body;
 
-    if (!formData.name || !formData.temperature) {
-        return res.status(400).json({ message: 'Missing required fields' });
+        if (!formData.name || !formData.temperature) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
+
+        const section = await SectionController.createSection(formData, idUser);
+
+        res.status(201).json(section.json());
+    } catch (error: any) {
+        return res.status(400).json({ message: error.message });
+
+    } finally {
+        Connector.disconnect();
     }
-
-    const section = await SectionController.createSection(formData, idUser);
-
-    res.status(201).json(section.json());
 });
 
 SectionRoute.patch('/:idSection', async (req: Request, res: Response) => {
-    const idUser = await authenticateUser(req, res);
+    try {
 
-    if (typeof idUser != "number") return;
+        const idUser = await authenticateUser(req, res);
 
-    const idSection = parseInt(req.params.idSection);
-    const formData = req.body;
+        if (typeof idUser != "number") return;
 
-    if (isNaN(idSection)) {
-        return res.status(404).json({ message: 'Invalid idSection!' });
+        const idSection = parseInt(req.params.idSection);
+        const formData = req.body;
+
+        if (isNaN(idSection)) {
+            return res.status(404).json({ message: 'Invalid idSection!' });
+        }
+
+        if (!formData.name && !formData.temperature && !formData.isActive) {
+            return res.status(400).json({ message: 'Missing required fields!' });
+        }
+
+        const section = await getSection(res, idSection, idUser);
+
+        if (!(section instanceof Section)) return;
+
+        await SectionController.updateSection(section, formData);
+
+        res.status(200).json(section.json());
+
+    } catch (error: any) {
+        return res.status(400).json({ message: error.message });
+
+    } finally {
+        Connector.disconnect();
     }
-
-    if (!formData.name && !formData.temperature && !formData.isActive) {
-        return res.status(400).json({ message: 'Missing required fields!' });
-    }
-
-    const section = await getSection(res, idSection, idUser);
-
-    if(!(section instanceof Section)) return;
-
-    await SectionController.updateSection(section, formData);
-
-    res.status(200).json(section.json());
 });
 
 SectionRoute.delete('/:idSection', async (req: Request, res: Response) => {
-    const idUser = await authenticateUser(req, res);
+    try {
+        const idUser = await authenticateUser(req, res);
 
-    if (typeof idUser != "number") return;
+        if (typeof idUser != "number") return;
 
-    const idSection = parseInt(req.params.idSection);
+        const idSection = parseInt(req.params.idSection);
 
-    if (isNaN(idSection)) {
-        return res.status(404).json({ message: 'Invalid idSection!' });
+        if (isNaN(idSection)) {
+            return res.status(404).json({ message: 'Invalid idSection!' });
+        }
+
+        const section = await getSection(res, idSection, idUser);
+
+        if (!(section instanceof Section)) return;
+
+        await SectionController.deleteSection(section, idUser);
+
+        res.status(200).json(section.json());
+
+    } catch (error: any) {
+        return res.status(400).json({ message: error.message });
+
+    } finally {
+        Connector.disconnect();
     }
-
-    const section = await getSection(res, idSection, idUser);
-
-    if(!(section instanceof Section)) return;
-
-    await SectionController.deleteSection(section, idUser);
-
-    res.status(200).json(section.json());
 });
 
 SectionRoute.get('/:idSection/messages', async (req: Request, res: Response) => {
-    const idUser = await authenticateUser(req, res);
+    try {
+        const idUser = await authenticateUser(req, res);
 
-    if (typeof idUser != "number") return;
+        if (typeof idUser != "number") return;
 
-    const idSection = parseInt(req.params.idSection);
-    if (isNaN(idSection)) {
-        return res.status(404).json({ message: 'Invalid idSection!' });
+        const idSection = parseInt(req.params.idSection);
+        if (isNaN(idSection)) {
+            return res.status(404).json({ message: 'Invalid idSection!' });
+        }
+
+        const section = await getSection(res, idSection, idUser);
+
+        if (!(section instanceof Section)) return;
+
+        const messages = await SectionController.getMessages(section);
+
+        res.status(200).json(messages);
+
+    } catch (error: any) {
+        return res.status(400).json({ message: error.message });
+
+    } finally {
+        Connector.disconnect();
     }
-
-    const section = await getSection(res, idSection, idUser);
-
-    if(!(section instanceof Section)) return;
-
-    const messages = await SectionController.getMessages(section);
-
-    res.status(200).json(messages);
 });
 
 SectionRoute.get('/', async (req: Request, res: Response) => {
-    const idUser = await authenticateUser(req, res);
+    try {
+        const idUser = await authenticateUser(req, res);
 
-    if (typeof idUser != "number") return;
+        if (typeof idUser != "number") return;
 
-    const sections = await SectionController.getSections(idUser);
+        const sections = await SectionController.getSections(idUser);
 
-    res.status(200).json(sections);
+        res.status(200).json(sections);
+    } catch (error: any) {
+        return res.status(400).json({ message: error.message });
+
+    } finally {
+        Connector.disconnect();
+    }
 });
 
 export const getSection = async (res: Response, idSection: number, idUser: number) => {

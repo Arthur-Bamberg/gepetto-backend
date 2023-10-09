@@ -81,8 +81,6 @@ export class Section {
 			} catch (err) {
 				console.error('Error getting messages:', err);
 				return null;
-			} finally {
-				await this._connector.disconnect();
 			}
 		}
 
@@ -137,8 +135,6 @@ export class Section {
 			} catch (err) {
 				console.error('Error getting messages:', err);
 				return [];
-			} finally {
-				await this._connector.disconnect();
 			}
 		}
 
@@ -153,7 +149,6 @@ export class Section {
 		this.addToUser(idUser).then(
 			async ()=> {
 				await this._connector.commit();
-				await this._connector.disconnect();
 			} 
 		);
 	}
@@ -225,8 +220,6 @@ export class Section {
 		} catch (err) {
 			console.error('Error fetching sections:', err);
 			return null;
-		} finally {
-			await connector.disconnect();
 		}
 	}
 
@@ -242,8 +235,6 @@ export class Section {
 			await this._connector.query(sql, values);
 		} catch (err) {
 			console.error('Error updating section:', err);
-		} finally {
-			await this._connector.disconnect();
 		}
 	}
 
@@ -261,8 +252,6 @@ export class Section {
 			this.isActive = false;
 		} catch (err) {
 			console.error('Error deleting section:', err);
-		} finally {
-			await this._connector.disconnect();
 		}
 	}
 
@@ -293,8 +282,6 @@ export class Section {
             await this._connector.query(sql, values);
         } catch (err) {
             console.error('Error removing section from user:', err);
-        } finally {
-            await this._connector.disconnect();
         }
     }
 
@@ -324,8 +311,6 @@ export class Section {
 		} catch (err) {
 			console.error('Error fetching section by ID:', err);
 			return null;
-		} finally {
-			await connector.disconnect();
 		}
 	}
 

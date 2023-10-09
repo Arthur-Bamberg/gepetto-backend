@@ -3,17 +3,25 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export class Connector {
+    private static staticConnection: any;
     private connection: any;
     private isConnected: boolean = false;
     private lastInsertedId: number = 0;
 
     constructor() {
-        this.connection = createConnection({
-            host: process.env.HOST,
-            user: process.env.USER,
-            password: process.env.PASSWORD,
-            database: process.env.DATABASE
-        });
+        if(Connector.staticConnection) {
+            this.connection = Connector.staticConnection;
+
+        } else {
+            this.connection = createConnection({
+                host: process.env.HOST,
+                user: process.env.USER,
+                password: process.env.PASSWORD,
+                database: process.env.DATABASE
+            });
+
+            Connector.staticConnection = this.connection;
+        }
     }
 
     public connect(): Promise<void> {
@@ -90,20 +98,18 @@ export class Connector {
         return this.lastInsertedId;
     }
 
-    public disconnect(): Promise<void> {
+    public static disconnect(): Promise<void> {
         return new Promise<void>((resolve, reject) => {
-            if(this.isConnected) {
-                this.connection.end((err: QueryError) => {
-                    if (err) {
-                        reject(err);
-                        return;
-                    }
-                    this.isConnected = false;
-                    resolve();
-                });
-            } else {
+            Connector.staticConnection.end((err: QueryError) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+
+                Connector.staticConnection = null;
+
                 resolve();
-            }
+            });
         });
     }
 }
