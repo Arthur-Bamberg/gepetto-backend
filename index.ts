@@ -23,8 +23,8 @@ app.listen(port, async () => {
     console.log(`Server it's running on http://localhost:${port}`);
 
     const url = await ngrok.connect({
-        authtoken: process.env.NGROK_AUTH_TOKEN, 
-        region: 'sa'
+        hostname: process.env.NGROK_DOMAIN,
+        authtoken: process.env.NGROK_AUTH_TOKEN 
     });
     console.log(`Ngrok tunnel is active at ${url}`);
 });
