@@ -100,6 +100,11 @@ export class Connector {
 
     public static disconnect(): Promise<void> {
         return new Promise<void>((resolve, reject) => {
+            if(!Connector.staticConnection) {
+                resolve();
+                return;
+            }
+
             Connector.staticConnection.end((err: QueryError) => {
                 if (err) {
                     reject(err);

@@ -17,6 +17,7 @@ RUN rm -rf ./controllers
 RUN rm -rf ./models
 RUN rm -rf ./routes
 RUN rm -rf ./utils
+RUN rm index.ts
 
 EXPOSE 80
 

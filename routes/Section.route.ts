@@ -21,11 +21,9 @@ SectionRoute.post('/', async (req: Request, res: Response) => {
         const section = await SectionController.createSection(formData, idUser);
 
         res.status(201).json(section.json());
+
     } catch (error: any) {
         return res.status(400).json({ message: error.message });
-
-    } finally {
-        Connector.disconnect();
     }
 });
 
