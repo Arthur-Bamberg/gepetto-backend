@@ -8,6 +8,7 @@ services:
     ports:
       - 80:80
     container_name: backend
+    restart: unless-stopped
     working_dir: /app
     depends_on:
       - mysql_server
@@ -19,7 +20,7 @@ services:
     ports:
       - 4321:3306
     container_name: mysql_server
-
+    restart: unless-stopped
     environment:
       - MYSQL_DATABASE=gepetto
       - MYSQL_USER=gepetto
