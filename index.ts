@@ -13,35 +13,41 @@ const numCPUs = cpus().length;
 
 if(cluster.isPrimary) {
     for(let i = 0; i < numCPUs; i++) {
-
+        cluster.fork();
     }
+
+    cluster.on('exit', (worker, code, signal) => {
+        console.log(`Worker ${worker.process.pid} died with code: ${code}, and signal: ${signal}`);
+        cluster.fork();
+    });
+
+} else {
+    dotenv.config();
+
+    const app = express();
+    const port = 80;
+    
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
+    
+    app.use('/auth', AuthenticatorRoute);
+    app.use('/users', UserRoute);
+    app.use('/sections', SectionRoute);
+    app.use('/messages', MessageRoute);
+    
+    app.get('/', (req, res) => {
+        fs.readFile('index.html', 'utf8', (err, data) => {
+            res.send(data);
+        });
+    });
+    
+    app.listen(port, async () => {
+        console.log(`Server it's running on http://localhost:${port} with ${process.pid} process id`);
+    
+        const url = await ngrok.connect({
+            hostname: process.env.NGROK_DOMAIN,
+            authtoken: process.env.NGROK_AUTH_TOKEN
+        });
+        console.log(`Ngrok tunnel is active at ${url} with ${process.pid} process id`);
+    });
 }
-
-dotenv.config();
-
-const app = express();
-const port = 80;
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-app.use('/auth', AuthenticatorRoute);
-app.use('/users', UserRoute);
-app.use('/sections', SectionRoute);
-app.use('/messages', MessageRoute);
-
-app.get('/', (req, res) => {
-    fs.readFile('index.html', 'utf8', (err, data) => {
-        res.send(data);
-    });
-});
-
-app.listen(port, async () => {
-    console.log(`Server it's running on http://localhost:${port}`);
-
-    const url = await ngrok.connect({
-        hostname: process.env.NGROK_DOMAIN,
-        authtoken: process.env.NGROK_AUTH_TOKEN
-    });
-    console.log(`Ngrok tunnel is active at ${url}`);
-});
