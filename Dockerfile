@@ -2,7 +2,7 @@ FROM node
 
 WORKDIR /app
 
-COPY index.ts tsconfig.json .env package.json yarn.lock ./
+COPY index.ts index.html tsconfig.json .env package.json yarn.lock ./
 
 RUN yarn install
 

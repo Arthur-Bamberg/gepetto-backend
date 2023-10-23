@@ -21,7 +21,7 @@ export class GPTConnector {
             const request: CreateCompletionRequest = {
                 model: 'text-davinci-003',
                 prompt: gptPrompt,
-                max_tokens: 100,
+                max_tokens: 1000,
                 temperature,
             };
 

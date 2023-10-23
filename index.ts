@@ -5,6 +5,7 @@ import { AuthenticatorRoute } from './routes/Authenticator.route';
 import { UserRoute } from './routes/User.route';
 import { SectionRoute } from './routes/Section.route';
 import { MessageRoute } from './routes/Message.route';
+import * as fs from 'fs';
 
 dotenv.config();
 
@@ -19,12 +20,18 @@ app.use('/users', UserRoute);
 app.use('/sections', SectionRoute);
 app.use('/messages', MessageRoute);
 
+app.get('/', (req, res) => {
+    fs.readFile('index.html', 'utf8', (err, data) => {
+        res.send(data);
+    });
+});
+
 app.listen(port, async () => {
     console.log(`Server it's running on http://localhost:${port}`);
 
     const url = await ngrok.connect({
         hostname: process.env.NGROK_DOMAIN,
-        authtoken: process.env.NGROK_AUTH_TOKEN 
+        authtoken: process.env.NGROK_AUTH_TOKEN
     });
     console.log(`Ngrok tunnel is active at ${url}`);
 });
