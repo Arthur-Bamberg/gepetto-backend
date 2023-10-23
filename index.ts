@@ -6,6 +6,16 @@ import { UserRoute } from './routes/User.route';
 import { SectionRoute } from './routes/Section.route';
 import { MessageRoute } from './routes/Message.route';
 import * as fs from 'fs';
+import cluster from 'cluster';
+import { cpus } from 'os';
+
+const numCPUs = cpus().length;
+
+if(cluster.isPrimary) {
+    for(let i = 0; i < numCPUs; i++) {
+
+    }
+}
 
 dotenv.config();
 
