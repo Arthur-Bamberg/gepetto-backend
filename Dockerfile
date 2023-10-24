@@ -2,7 +2,7 @@ FROM node
 
 WORKDIR /app
 
-COPY index.ts index.html tsconfig.json .env package.json yarn.lock ./
+COPY package.json ./
 
 RUN yarn install
 
@@ -10,6 +10,8 @@ COPY controllers ./controllers
 COPY models ./models
 COPY routes ./routes
 COPY utils ./utils
+
+COPY index.ts index.html tsconfig.json .env ./
 
 RUN yarn dist
 

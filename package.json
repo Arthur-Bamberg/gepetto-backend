@@ -14,13 +14,12 @@
   "dependencies": {
     "@google-cloud/speech": "^5.5.1",
     "@types/express": "^4.17.17",
-    "cluster": "^0.7.7",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.0",
     "mysql2": "^3.3.3",
     "ngrok": "^5.0.0-beta.2",
-    "openai": "^3.3.0",
+    "openai": "^4.12.4",
     "uuid": "^9.0.1"
   },
   "devDependencies": {

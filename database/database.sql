@@ -23,7 +23,7 @@ USE `gepetto`;
 CREATE TABLE IF NOT EXISTS `message` (
   `guidMessage` char(32) NOT NULL DEFAULT 'AUTO_INCREMENT',
   `type` enum('PROMPT','ANSWER') NOT NULL,
-  `content` varchar(500) NOT NULL,
+  `content` varchar(2000) NOT NULL,
   `FK_idSection` int(11) unsigned NOT NULL,
   `isAlternativeAnswer` tinyint(1) unsigned NOT NULL,
   `isActive` tinyint(1) unsigned NOT NULL,

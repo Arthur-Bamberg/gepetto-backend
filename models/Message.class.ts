@@ -95,11 +95,11 @@ export class Message {
             if (!this._content) {
                 throw new Error('Missing content');   
             }
-            const lastMessage = await this.getLastMessageContent(this._FK_idSection ?? 0);
+            const previousContent = await this.getContent(this._FK_idSection ?? 0);
 
             const AIConnector: GPTConnector = new GPTConnector();
 
-            const content = await AIConnector.sendPrompt(lastMessage ?? '', 0.8, this._content) ?? '';
+            const content = await AIConnector.sendPrompt(previousContent ?? '', this._content) ?? '';
 
             this.guidMessage = uuidv4();
 
@@ -235,16 +235,27 @@ export class Message {
         }
     }
 
-    private async getLastMessageContent(idSection: number): Promise<string | null> {
+    private async getContent(idSection: number): Promise<string | null> {
         const sql = `
             SELECT 
-                message.content
-            FROM message
+                CONCAT(if(
+                    message.type = 'PROMPT',
+                    'PERGUNTA: ',
+                    'RESPOSTA: '
+                ), message.content) as textContent
+
+            FROM 
+                message
+                
                 INNER JOIN section 
-                    ON message.guidMessage = section.FK_guidLastMessage
+                    ON message.FK_idSection = section.idSection
+
             WHERE 
                 section.idSection = ?
+                    
+            ORDER BY message.createdOn, message.type
         `;
+
         const values = [idSection];
 
         try {
@@ -254,7 +265,15 @@ export class Message {
             if (rows.length === 0) {
                 return null;
             }
-            return rows[0].content;
+
+            let content = '';
+
+            for (const row of rows) {
+                content += row.textContent + '\n';
+            }
+
+            return content;
+            
         } catch (err) {
             console.error('Error getting last message content:', err);
             return null;
