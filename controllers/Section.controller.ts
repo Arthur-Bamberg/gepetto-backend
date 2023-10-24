@@ -2,7 +2,7 @@ import { Section } from "../models/Section.class";
 
 export class SectionController {
     public static async createSection(formData: any, idUser: number): Promise<Section> {
-        const section = new Section(formData.name, formData.temperature, formData.isActive ?? 1);
+        const section = new Section(formData.name, formData.isActive ?? 1);
         await section.create(idUser);
         return section;
     }
@@ -10,10 +10,6 @@ export class SectionController {
     public static async updateSection(section: Section, formData: any): Promise<void> {
         if(formData.name) {
             section.name = formData.name;
-        }
-
-        if(formData.temperature) {
-            section.temperature = formData.temperature;
         }
 
         if(formData.isActive) {

@@ -54,7 +54,6 @@ CREATE TABLE IF NOT EXISTS `message_history` (
 -- Dumping structure for table gepetto.section
 CREATE TABLE IF NOT EXISTS `section` (
   `idSection` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `temperature` float unsigned NOT NULL,
   `name` varchar(50) NOT NULL,
   `FK_guidLastMessage` char(32) DEFAULT NULL,
   `isActive` tinyint(1) unsigned NOT NULL,

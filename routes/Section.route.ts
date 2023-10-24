@@ -14,7 +14,7 @@ SectionRoute.post('/', async (req: Request, res: Response) => {
 
         const formData = req.body;
 
-        if (!formData.name || !formData.temperature) {
+        if (!formData.name || formData.name.trim() == '') {
             return res.status(400).json({ message: 'Missing required fields' });
         }
 
@@ -41,7 +41,7 @@ SectionRoute.patch('/:idSection', async (req: Request, res: Response) => {
             return res.status(404).json({ message: 'Invalid idSection!' });
         }
 
-        if (!formData.name && !formData.temperature && !formData.isActive) {
+        if ((!formData.name || formData.name.trim() == '') && !formData.isActive) {
             return res.status(400).json({ message: 'Missing required fields!' });
         }
 

@@ -1,20 +1,16 @@
 import { Connector } from "../utils/Connector";
 import { Message } from "./Message.class";
 
-type Temperature = 0.1 | 0.2 | 0.3 | 0.4 | 0.5 | 0.6 | 0.7 | 0.8 | 0.9 | 1.0;
-
 export class Section {
 	private _idSection?: number;
-	private _temperature: Temperature;
 	private _name: string;
 	private _lastMessage?: Message;
 	private _messages?: any [];
 	private _isActive?: boolean;
 	private _connector: Connector;
 
-	constructor(name: string, temperature: Temperature, idSection?: number, isActive?: boolean, lastMessage?: Message) {
+	constructor(name: string, idSection?: number, isActive?: boolean, lastMessage?: Message) {
 		this._name = name;
-		this._temperature = temperature;
 		this._idSection = idSection;
 		this._isActive = isActive ?? true;
 		this._lastMessage = lastMessage;
@@ -30,14 +26,6 @@ export class Section {
 			throw new Error('idSection must be a positive number.');
 		}
 		this._idSection = id;
-	}
-
-	get temperature(): Temperature {
-		return this._temperature;
-	}
-
-	set temperature(temp: Temperature) {
-		this._temperature = temp;
 	}
 
 	get name(): string {
@@ -155,10 +143,10 @@ export class Section {
 
 	private async save(): Promise<void> {
 		const sql = `
-            INSERT INTO section (name, temperature, isActive)
-            VALUES (?, ?, ?)
+            INSERT INTO section (name, isActive)
+            VALUES (?, ?)
         `;
-		const values = [this._name, this._temperature, this._isActive];
+		const values = [this._name, this._isActive];
 		try {
 			await this._connector.query(sql, values);
 			this._idSection = this._connector.getLastInsertedId();
@@ -172,7 +160,6 @@ export class Section {
             SELECT 
 				section.idSection, 
 				section.name, 
-				section.temperature, 
 				section.isActive,
 
 				message.guidMessage,
@@ -209,9 +196,9 @@ export class Section {
 				if(row.guidMessage !== null) {
 					const message = new Message(row.content, row.type, row.idSection, row.isAlternativeAnswer, row.guidMessage, row.messageIsActive);	
 
-					sections.push(new Section(row.name, row.temperature, row.idSection, row.isActive, message).json());
+					sections.push(new Section(row.name, row.idSection, row.isActive, message).json());
 				} else {
-					sections.push(new Section(row.name, row.temperature, row.idSection, row.isActive).json());
+					sections.push(new Section(row.name, row.idSection, row.isActive).json());
 				}
 			});
 
@@ -226,10 +213,10 @@ export class Section {
 	public async update(): Promise<void> {
 		const sql = `
             UPDATE section
-            SET name = ?, temperature = ?, isActive = ?
+            SET name = ?, isActive = ?
             WHERE idSection = ?
         `;
-		const values = [this._name, this._temperature, this._isActive, this._idSection];
+		const values = [this._name, this._isActive, this._idSection];
 		try {
 			await this._connector.connect();
 			await this._connector.query(sql, values);
@@ -287,7 +274,7 @@ export class Section {
 
 	public static async getById(idSection: number, idUser: number): Promise<Section | null> {
 		const sql = `
-            SELECT idSection, name, temperature, isActive
+            SELECT idSection, name, isActive
             FROM section
 				INNER JOIN userSection
 					ON section.idSection = userSection.FK_idSection
@@ -306,7 +293,7 @@ export class Section {
 				return null;
 			}
 			const row = rows[0];
-			const section = new Section(row.name, row.temperature, row.idSection, row.isActive);
+			const section = new Section(row.name, row.idSection, row.isActive);
 			return section;
 		} catch (err) {
 			console.error('Error fetching section by ID:', err);
@@ -318,7 +305,6 @@ export class Section {
 		return {
 			idSection: this._idSection,
 			name: this._name,
-			temperature: this._temperature,
 			isActive: this._isActive,
 			lastMessage: this._lastMessage?.json().content ?? ''
 		};
