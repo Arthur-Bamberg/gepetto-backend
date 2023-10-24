@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - 80:80
+      - 81:80
     container_name: backend
     restart: unless-stopped
     working_dir: /app

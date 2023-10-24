@@ -6,32 +6,50 @@ import { UserRoute } from './routes/User.route';
 import { SectionRoute } from './routes/Section.route';
 import { MessageRoute } from './routes/Message.route';
 import * as fs from 'fs';
+import cluster from 'cluster';
+import { cpus } from 'os';
 
-dotenv.config();
+const numCPUs = cpus().length;
 
-const app = express();
-const port = 80;
+if(cluster.isPrimary) {
+    for(let i = 0; i < numCPUs; i++) {
+        cluster.fork();
+    }
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-app.use('/auth', AuthenticatorRoute);
-app.use('/users', UserRoute);
-app.use('/sections', SectionRoute);
-app.use('/messages', MessageRoute);
-
-app.get('/', (req, res) => {
-    fs.readFile('index.html', 'utf8', (err, data) => {
-        res.send(data);
+    cluster.on('exit', (worker, code, signal) => {
+        console.log(`Worker ${worker.process.pid} died with code: ${code}, and signal: ${signal}`);
+        cluster.fork();
     });
-});
 
-app.listen(port, async () => {
-    console.log(`Server it's running on http://localhost:${port}`);
+    (async ()=> {
+        const url = await ngrok.connect({
+            hostname: process.env.NGROK_DOMAIN,
+            authtoken: process.env.NGROK_AUTH_TOKEN
+        });
+        console.log(`Ngrok tunnel is active at ${url}`);
+    })();
 
-    const url = await ngrok.connect({
-        hostname: process.env.NGROK_DOMAIN,
-        authtoken: process.env.NGROK_AUTH_TOKEN
+} else {
+    dotenv.config();
+
+    const app = express();
+    const port = 80;
+    
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
+    
+    app.use('/auth', AuthenticatorRoute);
+    app.use('/users', UserRoute);
+    app.use('/sections', SectionRoute);
+    app.use('/messages', MessageRoute);
+    
+    app.get('/', (req, res) => {
+        fs.readFile('index.html', 'utf8', (err, data) => {
+            res.send(data);
+        });
     });
-    console.log(`Ngrok tunnel is active at ${url}`);
-});
+    
+    app.listen(port, () => {
+        console.log(`Server it's running on http://localhost:${port} with ${process.pid} process id`);
+    });
+}
