@@ -5,6 +5,7 @@ import { AuthenticatorRoute } from './routes/Authenticator.route';
 import { UserRoute } from './routes/User.route';
 import { SectionRoute } from './routes/Section.route';
 import { MessageRoute } from './routes/Message.route';
+import { EmailSenderRoute } from './routes/EmailSender.route';
 import * as fs from 'fs';
 import cluster from 'cluster';
 import { cpus } from 'os';
@@ -42,6 +43,7 @@ if(cluster.isPrimary) {
     app.use('/users', UserRoute);
     app.use('/sections', SectionRoute);
     app.use('/messages', MessageRoute);
+    app.use('/send-email', EmailSenderRoute);
     
     app.get('/', (req, res) => {
         fs.readFile('index.html', 'utf8', (err, data) => {
