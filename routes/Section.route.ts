@@ -55,9 +55,6 @@ SectionRoute.patch('/:idSection', async (req: Request, res: Response) => {
 
     } catch (error: any) {
         return res.status(400).json({ message: error.message });
-
-    } finally {
-        Connector.disconnect();
     }
 });
 
@@ -84,8 +81,6 @@ SectionRoute.delete('/:idSection', async (req: Request, res: Response) => {
     } catch (error: any) {
         return res.status(400).json({ message: error.message });
 
-    } finally {
-        Connector.disconnect();
     }
 });
 
@@ -111,8 +106,6 @@ SectionRoute.get('/:idSection/messages', async (req: Request, res: Response) => 
     } catch (error: any) {
         return res.status(400).json({ message: error.message });
 
-    } finally {
-        Connector.disconnect();
     }
 });
 
@@ -128,8 +121,6 @@ SectionRoute.get('/', async (req: Request, res: Response) => {
     } catch (error: any) {
         return res.status(400).json({ message: error.message });
 
-    } finally {
-        Connector.disconnect();
     }
 });
 

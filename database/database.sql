@@ -72,6 +72,8 @@ CREATE TABLE IF NOT EXISTS `user` (
   `password` varchar(50) NOT NULL,
   `isActive` tinyint(1) unsigned NOT NULL DEFAULT '1',
   `issuedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `changePasswordId` char(64) NULL DEFAULT NULL,
+  `changePasswordExpires` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`idUser`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

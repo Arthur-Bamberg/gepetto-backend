@@ -1,4 +1,12 @@
+import { v4 as uuidv4 } from 'uuid';
 import { Connector } from "../utils/Connector";
+import dotenv from 'dotenv';
+dotenv.config();
+
+type ChangePasswordReturn = {
+    isValid: boolean,
+    link: string
+};
 
 export class User {
     private _idUser?: number;
@@ -278,9 +286,65 @@ export class User {
 
         userTime.iat = Math.floor(userTime.issuedAt / 1000);
 
-        userTime.exp = Math.floor(userTime.issuedAt / 1000) + 24 * (60 * 60); // 24 hours
+        userTime.exp = Math.floor(userTime.issuedAt / 1000) + 30 * 24 * (60 * 60); // 30 days
 
         return userTime;
+    }
+
+    public static async enableChangePassword(name:string, email:string): Promise< ChangePasswordReturn | void > {
+        const selectQuery = `
+            SELECT idUser
+            FROM user
+            WHERE 
+                name = ?
+                AND email = ?                 
+                AND isActive = 1
+            LIMIT 1
+        `;
+
+        const selectValues = [name, email];
+
+        const updateQuery = `
+            UPDATE user
+            SET 
+                changePasswordId = ?,
+                changePasswordExpires = ?
+            WHERE idUser = ?
+        `;
+
+        const changePasswordId = `${uuidv4().replace(/-/g, '')}${uuidv4().replace(/-/g, '')}`;
+
+        const now = new Date();
+        const changePasswordExpires = new Date(now);
+        changePasswordExpires.setDate(now.getDate() + 1); // 1 day
+
+        const connector = new Connector();
+
+        try {
+            await connector.connect();
+            const rows = await connector.query(selectQuery, selectValues);
+
+            if (rows.length === 0) {
+                return {
+                    isValid: false,
+                    link: ''
+                };
+            }
+
+            const idUser = rows[0].idUser;
+
+            const updateValues = [changePasswordId, changePasswordExpires, idUser];
+
+            connector.query(updateQuery, updateValues);
+
+            return {
+                isValid: true,
+                link: `${process.env.NGROK_DOMAIN}/change-password/${changePasswordId}`
+            };
+
+        } catch (err) {
+            console.error('Error enabling change password:', err);
+        }
     }
 
     public json() {

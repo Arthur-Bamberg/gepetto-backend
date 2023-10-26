@@ -57,9 +57,6 @@ UserRoute.patch('/', async (req: Request, res: Response) => {
 
     } catch (error: any) {
         return res.status(400).json({ message: error.message });
-
-    } finally {
-        Connector.disconnect();
     }
 });
 
@@ -85,8 +82,5 @@ UserRoute.delete('/', async (req: Request, res: Response) => {
 
     } catch (error: any) {
         return res.status(400).json({ message: error.message });
-
-    } finally {
-        Connector.disconnect();
     }
 });
