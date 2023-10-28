@@ -22,13 +22,13 @@ if(cluster.isPrimary) {
         cluster.fork();
     });
 
-    (async ()=> {
-        const url = await ngrok.connect({
-            hostname: process.env.NGROK_DOMAIN,
-            authtoken: process.env.NGROK_AUTH_TOKEN
-        });
-        console.log(`Ngrok tunnel is active at ${url}`);
-    })();
+    // (async ()=> {
+    //     const url = await ngrok.connect({
+    //         hostname: process.env.NGROK_DOMAIN,
+    //         authtoken: process.env.NGROK_AUTH_TOKEN
+    //     });
+    //     console.log(`Ngrok tunnel is active at ${url}`);
+    // })();
 
 } else {
     dotenv.config();
@@ -44,12 +44,10 @@ if(cluster.isPrimary) {
     app.use('/sections', SectionRoute);
     app.use('/messages', MessageRoute);
     app.use('/send-email', EmailSenderRoute);
-    
-    app.get('/', (req, res) => {
-        fs.readFile('index.html', 'utf8', (err, data) => {
-            res.send(data);
-        });
-    });
+
+    app.use('/change-password/:changePasswordId', express.static(__dirname + '/change-password'));
+
+    app.use('/', express.static(__dirname + '/privacy-policy'));
     
     app.listen(port, () => {
         console.log(`Server it's running on http://localhost:${port} with ${process.pid} process id`);

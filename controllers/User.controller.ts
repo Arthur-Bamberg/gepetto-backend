@@ -8,25 +8,8 @@ export class UserController {
         return Authenticator.signJWT(user.json());
     }
 
-    public static async updateUser(user: User, formData: any) {
-        if(formData.name) {
-            user.name = formData.name;
-        }
-
-        if(formData.email) {
-            user.email = formData.email;
-        }
-
-        if(formData.password) {
-            user.password = formData.password;
-        }
-
-        if(formData.isActive) {
-            user.isActive = formData.isActive;
-        }
-
-        await user.update();
-        return Authenticator.signJWT(user.json());
+    public static async changePassword(idUser: number, password: string) {
+        await User.changePassword(idUser, password);
     }
     
     public static async deleteUser(user: User) {
@@ -39,5 +22,9 @@ export class UserController {
 
     public static async emailIsUnique(email: string) {
         return await User.emailIsUnique(email);
+    }
+
+    public static async authenticateByChangePasswordId(changePasswordId: string) {
+        return await User.authenticateByChangePasswordId(changePasswordId);
     }
 }

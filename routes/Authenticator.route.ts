@@ -1,6 +1,5 @@
 import express, { Request, Response } from 'express';
 import { AuthenticatorController } from '../controllers/Authenticator.controller';
-import { Connector } from '../utils/Connector';
 
 export const AuthenticatorRoute = express.Router();
 

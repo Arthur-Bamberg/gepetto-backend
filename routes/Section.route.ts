@@ -1,5 +1,4 @@
 import express, { Request, Response } from 'express';
-import { Connector } from '../utils/Connector';
 import { SectionController } from '../controllers/Section.controller';
 import { authenticateUser } from './Authenticator.route';
 import { Section } from '../models/Section.class';

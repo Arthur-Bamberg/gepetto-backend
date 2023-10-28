@@ -111,18 +111,25 @@ export class User {
         }
     }
 
-    public async update(): Promise<void> {
-        const userTime = this.getAndSetUserTime();
-
+    public static async changePassword(idUser: number, password: string): Promise<void> {
         const sql = `
             UPDATE user
-            SET name = ?, email = ?, password = md5(sha1(?)), isActive = ?, issuedAt = ?
+            SET 
+                password = md5(sha1(?)), 
+                issuedAt = NOW(),
+                changePasswordId = NULL,
+                changePasswordExpires = NULL
+
             WHERE idUser = ?
         `;
-        const values = [this._name, this._email, this._password, this._isActive, new Date(userTime.issuedAt), this._idUser];
+        const values = [password, idUser];
+
+        const connector = new Connector();
+
         try {
-            await this._connector.connect();
-            await this._connector.query(sql, values);
+            await connector.connect();
+            await connector.query(sql, values);
+
         } catch (err) {
             console.error('Error updating user:', err);
         }
@@ -308,15 +315,11 @@ export class User {
             UPDATE user
             SET 
                 changePasswordId = ?,
-                changePasswordExpires = ?
+                changePasswordExpires = DATE_ADD(NOW(), INTERVAL 1 DAY)
             WHERE idUser = ?
         `;
 
         const changePasswordId = `${uuidv4().replace(/-/g, '')}${uuidv4().replace(/-/g, '')}`;
-
-        const now = new Date();
-        const changePasswordExpires = new Date(now);
-        changePasswordExpires.setDate(now.getDate() + 1); // 1 day
 
         const connector = new Connector();
 
@@ -333,7 +336,7 @@ export class User {
 
             const idUser = rows[0].idUser;
 
-            const updateValues = [changePasswordId, changePasswordExpires, idUser];
+            const updateValues = [changePasswordId, idUser];
 
             connector.query(updateQuery, updateValues);
 
@@ -344,6 +347,36 @@ export class User {
 
         } catch (err) {
             console.error('Error enabling change password:', err);
+        }
+    }
+
+    public static async authenticateByChangePasswordId(changePasswordId: string) {
+        const selectQuery = `
+            SELECT idUser
+            FROM user
+            WHERE 
+                changePasswordId = ?
+                AND changePasswordExpires >= now()               
+                AND isActive = 1
+            LIMIT 1
+        `;
+
+        const selectValues = [changePasswordId];
+
+        const connector = new Connector();
+
+        try {
+            await connector.connect();
+            const rows = await connector.query(selectQuery, selectValues);
+
+            if(rows.length === 0) {
+                return null;
+            }
+
+            return parseInt(rows[0].idUser);
+
+        } catch (err) {
+            console.error('Error enabling changing password:', err);
         }
     }
 

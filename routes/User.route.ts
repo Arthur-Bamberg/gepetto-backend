@@ -1,5 +1,4 @@
 import express, { Request, Response } from 'express';
-import { Connector } from '../utils/Connector';
 import { UserController } from '../controllers/User.controller';
 import { authenticateUser } from './Authenticator.route';
 
@@ -26,34 +25,27 @@ UserRoute.post('/', async (req: Request, res: Response) => {
     }
 });
 
-UserRoute.patch('/', async (req: Request, res: Response) => {
+UserRoute.patch('/:changePasswordId', async (req: Request, res: Response) => {
     try {
-        const idUser = await authenticateUser(req, res);
+        const idUser = await UserController.authenticateByChangePasswordId(req.params.changePasswordId);
 
-        if (typeof idUser != "number") return;
-        const formData = req.body;
-
-        if (isNaN(idUser)) {
+        if (typeof idUser != "number") {
             return res.status(404).json({ message: 'Invalid idUser!' });
         }
 
-        if (!formData.name && !formData.email && !formData.password && !formData.isActive) {
-            return res.status(400).json({ message: 'Missing required fields!' });
+        const password = req.body.password;
+
+        const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passwordPattern.test(password)) {
+            throw new Error('password must contain at least 8 characters, including uppercase, lowercase, digit, and special characters.');
         }
 
-        const user = await UserController.getUser(idUser);
+        await UserController.changePassword(idUser, password);
 
-        if (!user) {
-            return res.status(404).json({ message: 'User not found!' });
-        }
-
-        if (formData.email && formData.email != user.email && !await UserController.emailIsUnique(formData.email)) {
-            return res.status(400).json({ message: 'Email already registered!' });
-        }
-
-        const token = await UserController.updateUser(user, formData);
-
-        res.status(200).json({ token });
+        res.status(200).json({
+            status: 'success',
+            message: 'Password changed successfully!' 
+        });
 
     } catch (error: any) {
         return res.status(400).json({ message: error.message });

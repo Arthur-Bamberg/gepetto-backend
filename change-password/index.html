@@ -1,0 +1,53 @@
+<script>
+    (async () => {
+        let changedPasswordSuccessfully = false;
+
+        do {
+            const password = prompt("Insira sua nova senha: ");
+            const passwordConfirm = prompt("Confirme sua nova senha: ");
+
+            const validatePassword = (password) => {
+                const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+                return passwordPattern.test(password);
+            };
+
+            if (password == '' || passwordConfirm == '') {
+                alert("A senha não pode estar vazia!");
+
+            } else if (password !== passwordConfirm) {
+                alert("As senhas não coincidem!");
+
+            } else if (!validatePassword(password)) {
+                alert("As senhas devem ter no mínimo 8 caracteres, uma letra maiúscula, uma letra minúscula, um número e um caractere especial!");
+
+            } else {
+                const urlParsed = window.location.href.trim().split('/');
+
+                if(urlParsed[urlParsed.length - 1] == '') {
+                    urlParsed.pop();
+                }
+
+                const changePasswordId = urlParsed[urlParsed.length - 1];
+
+                const changePasswordResult = await fetch(`https://famous-frequently-mudfish.ngrok-free.app/users/${changePasswordId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        password
+                    })
+                });
+
+                if(changePasswordResult.status == 200) {
+                    changedPasswordSuccessfully = true;
+
+                    alert("Senha alterada com sucesso!");
+
+                } else {
+                    alert("Erro ao alterar senha!");
+                }
+            }
+        } while (!changedPasswordSuccessfully);
+    })();
+</script>

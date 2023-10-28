@@ -10,8 +10,10 @@ COPY controllers ./controllers
 COPY models ./models
 COPY routes ./routes
 COPY utils ./utils
+COPY change-password ./dist/change-password
+COPY privacy-policy ./dist/privacy-policy
 
-COPY index.ts index.html tsconfig.json .env ./
+COPY index.ts tsconfig.json .env ./
 
 RUN yarn dist
 
