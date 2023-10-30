@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import { EmailSenderController } from '../controllers/EmailSender.controller';
+import { Connector } from '../utils/Connector';
 
 export const EmailSenderRoute = express.Router();
 
@@ -19,5 +20,8 @@ EmailSenderRoute.post('/', async (req: Request, res: Response) => {
         }
     } catch (error: any) {
         return res.status(400).json({ message: error.message });
+
+    } finally {
+        Connector.closeConnection();
     }
 });

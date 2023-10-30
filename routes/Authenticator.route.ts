@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import { AuthenticatorController } from '../controllers/Authenticator.controller';
+import { Connector } from '../utils/Connector';
 
 export const AuthenticatorRoute = express.Router();
 
@@ -17,6 +18,9 @@ AuthenticatorRoute.post('/', async (req: Request, res: Response) => {
 
     } catch(error: any) {
         return res.status(400).json({ message: error.message });
+
+    } finally {
+        Connector.closeConnection();
     }
 });
 

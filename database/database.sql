@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS `message_history` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `guidMessage` char(32) NOT NULL DEFAULT '',
   `type` enum('PROMPT','ANSWER') NOT NULL,
-  `content` varchar(500) NOT NULL,
+  `content` varchar(3000) NOT NULL,
   `FK_idSection` int(11) unsigned NOT NULL,
   `isAlternativeAnswer` tinyint(1) unsigned NOT NULL,
   `isActive` tinyint(1) unsigned NOT NULL,

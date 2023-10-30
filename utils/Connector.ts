@@ -1,49 +1,46 @@
-import { createConnection, QueryError, RowDataPacket } from 'mysql2';
+import { Pool, PoolConnection, createPool, QueryError, RowDataPacket } from 'mysql2';
 import dotenv from 'dotenv';
 dotenv.config();
 
 export class Connector {
-    private static staticConnection: any;
-    private connection: any;
-    private isConnected: boolean = false;
+    private static staticConnector: Connector|null = null;
+    private pool: Pool|null = null; 
+    private connection: PoolConnection|null = null;
     private lastInsertedId: number = 0;
 
     constructor() {
-        if(Connector.staticConnection) {
-            this.connection = Connector.staticConnection;
+        if(Connector.staticConnector) {
+            return Connector.staticConnector;
 
         } else {
-            this.connection = createConnection({
+            this.pool = createPool({
                 host: process.env.HOST,
                 user: process.env.USER,
                 password: process.env.PASSWORD,
                 database: process.env.DATABASE
             });
 
-            Connector.staticConnection = this.connection;
+            Connector.staticConnector = this;
         }
     }
 
     public connect(): Promise<void> {
         return new Promise<void>((resolve, reject) => {
-            if(!this.isConnected) {
-                this.connection.connect((err: QueryError) => {
-                    if (err) {
-                        reject(err);
-                        return;
-                    }
-                    this.isConnected = true;
-                    resolve();
-                });
-            } else {
+            this.pool?.getConnection((err: any, connection: PoolConnection) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+
+                this.connection = connection;
                 resolve();
-            }
+            });
         });
     }
 
     public async beginTransaction(): Promise<void> {
         return new Promise((resolve, reject) => {
-            this.connection.beginTransaction((err: object) => {
+            this.connection?.beginTransaction((err: object | null) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -55,7 +52,7 @@ export class Connector {
 
     public async commit(): Promise<void> {
         return new Promise((resolve, reject) => {
-            this.connection.commit((err: object) => {
+            this.connection?.commit((err: object | null) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -67,7 +64,7 @@ export class Connector {
 
     public async rollback(): Promise<void> {
         return new Promise((resolve, reject) => {
-            this.connection.rollback((err: object) => {
+            this.connection?.rollback((err: object | null) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -79,7 +76,7 @@ export class Connector {
 
     public query(sql: string, values?: any[]): Promise<RowDataPacket[]> {
         return new Promise<RowDataPacket[]>((resolve, reject) => {
-            this.connection.query(sql, values, (err: QueryError, rows: any) => {
+            this.connection?.query(sql, values, (err: QueryError | null, rows: any) => {
                 if (err) {
                     reject(err);
                     return;
@@ -96,5 +93,20 @@ export class Connector {
 
     public getLastInsertedId(): number {
         return this.lastInsertedId;
+    }
+
+    public static async closeConnection(): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            if(!Connector.staticConnector?.connection) {
+                resolve();
+                return;
+            }
+
+            Connector.staticConnector.pool?.releaseConnection(Connector.staticConnector.connection);
+
+            Connector.staticConnector = null;
+
+            resolve();
+        });
     }
 }

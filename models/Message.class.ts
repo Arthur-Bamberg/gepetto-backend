@@ -259,8 +259,6 @@ export class Message {
         const values = [idSection];
 
         try {
-            await this._connector.connect();
-
             const rows = await this._connector.query(sql, values);
             if (rows.length === 0) {
                 return null;

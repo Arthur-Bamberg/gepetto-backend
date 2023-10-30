@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import { SectionController } from '../controllers/Section.controller';
 import { authenticateUser } from './Authenticator.route';
 import { Section } from '../models/Section.class';
+import { Connector } from '../utils/Connector';
 
 export const SectionRoute = express.Router();
 
@@ -23,6 +24,9 @@ SectionRoute.post('/', async (req: Request, res: Response) => {
 
     } catch (error: any) {
         return res.status(400).json({ message: error.message });
+
+    } finally {
+        Connector.closeConnection();
     }
 });
 
@@ -54,6 +58,9 @@ SectionRoute.patch('/:idSection', async (req: Request, res: Response) => {
 
     } catch (error: any) {
         return res.status(400).json({ message: error.message });
+
+    } finally {
+        Connector.closeConnection();
     }
 });
 
@@ -80,6 +87,8 @@ SectionRoute.delete('/:idSection', async (req: Request, res: Response) => {
     } catch (error: any) {
         return res.status(400).json({ message: error.message });
 
+    } finally {
+        Connector.closeConnection();
     }
 });
 
@@ -105,6 +114,8 @@ SectionRoute.get('/:idSection/messages', async (req: Request, res: Response) => 
     } catch (error: any) {
         return res.status(400).json({ message: error.message });
 
+    } finally {
+        Connector.closeConnection();
     }
 });
 
@@ -120,6 +131,8 @@ SectionRoute.get('/', async (req: Request, res: Response) => {
     } catch (error: any) {
         return res.status(400).json({ message: error.message });
 
+    } finally {
+        Connector.closeConnection();
     }
 });
 

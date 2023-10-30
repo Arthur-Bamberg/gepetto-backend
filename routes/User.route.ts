@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import { UserController } from '../controllers/User.controller';
 import { authenticateUser } from './Authenticator.route';
+import { Connector } from '../utils/Connector';
 
 export const UserRoute = express.Router();
 
@@ -22,6 +23,9 @@ UserRoute.post('/', async (req: Request, res: Response) => {
 
     } catch (error: any) {
         return res.status(400).json({ message: error.message });
+
+    } finally {
+        Connector.closeConnection();
     }
 });
 
@@ -49,6 +53,9 @@ UserRoute.patch('/:changePasswordId', async (req: Request, res: Response) => {
 
     } catch (error: any) {
         return res.status(400).json({ message: error.message });
+
+    } finally {
+        Connector.closeConnection();
     }
 });
 
@@ -74,5 +81,8 @@ UserRoute.delete('/', async (req: Request, res: Response) => {
 
     } catch (error: any) {
         return res.status(400).json({ message: error.message });
+
+    } finally {
+        Connector.closeConnection();
     }
 });

@@ -3,6 +3,7 @@ import { MessageController } from '../controllers/Message.controller';
 import { authenticateUser } from './Authenticator.route';
 import { getSection } from './Section.route';
 import { Section } from '../models/Section.class';
+import { Connector } from '../utils/Connector';
 
 export const MessageRoute = express.Router();
 
@@ -31,6 +32,9 @@ MessageRoute.post('/', async (req: Request, res: Response) => {
 
     } catch(error: any) {
         return res.status(400).json({ message: error.message });
+
+    } finally {
+        Connector.closeConnection();
     }
 });
 
@@ -67,6 +71,9 @@ MessageRoute.patch('/:guidMessage', async (req: Request, res: Response) => {
 
     } catch(error: any) {
         return res.status(400).json({ message: error.message });
+
+    } finally {
+        Connector.closeConnection();
     }
 });
 
@@ -96,5 +103,8 @@ MessageRoute.delete('/:guidMessage', async (req: Request, res: Response) => {
         
     } catch(error: any) {
         return res.status(400).json({ message: error.message });
-    } 
+
+    } finally {
+        Connector.closeConnection();
+    }
 });

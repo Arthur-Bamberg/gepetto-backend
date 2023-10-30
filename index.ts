@@ -6,7 +6,6 @@ import { UserRoute } from './routes/User.route';
 import { SectionRoute } from './routes/Section.route';
 import { MessageRoute } from './routes/Message.route';
 import { EmailSenderRoute } from './routes/EmailSender.route';
-import * as fs from 'fs';
 import cluster from 'cluster';
 import { cpus } from 'os';
 
@@ -22,13 +21,13 @@ if(cluster.isPrimary) {
         cluster.fork();
     });
 
-    // (async ()=> {
-    //     const url = await ngrok.connect({
-    //         hostname: process.env.NGROK_DOMAIN,
-    //         authtoken: process.env.NGROK_AUTH_TOKEN
-    //     });
-    //     console.log(`Ngrok tunnel is active at ${url}`);
-    // })();
+    (async ()=> {
+        const url = await ngrok.connect({
+            hostname: process.env.NGROK_DOMAIN,
+            authtoken: process.env.NGROK_AUTH_TOKEN
+        });
+        console.log(`Ngrok tunnel is active at ${url}`);
+    })();
 
 } else {
     dotenv.config();

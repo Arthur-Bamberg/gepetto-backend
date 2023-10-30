@@ -134,11 +134,8 @@ export class Section {
 		await this._connector.beginTransaction();
 
 		await this.save();
-		this.addToUser(idUser).then(
-			async ()=> {
-				await this._connector.commit();
-			} 
-		);
+		await this.addToUser(idUser);
+		await this._connector.commit();
 	}
 
 	private async save(): Promise<void> {
@@ -250,7 +247,6 @@ export class Section {
         const values = [idUser, this.idSection];
 
         try {
-            await this._connector.connect();
             await this._connector.query(sql, values);
         } catch (err) {
             console.error('Error adding user to section:', err);
