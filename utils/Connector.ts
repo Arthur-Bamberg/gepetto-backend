@@ -104,6 +104,8 @@ export class Connector {
 
             Connector.staticConnector.pool?.releaseConnection(Connector.staticConnector.connection);
 
+            Connector.staticConnector.connection.release();
+
             Connector.staticConnector = null;
 
             resolve();
