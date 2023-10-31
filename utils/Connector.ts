@@ -26,6 +26,11 @@ export class Connector {
 
     public connect(): Promise<void> {
         return new Promise<void>((resolve, reject) => {
+            if(this.connection) {
+                resolve();
+                return;
+            }
+
             this.pool?.getConnection((err: any, connection: PoolConnection) => {
                 if (err) {
                     reject(err);
@@ -106,7 +111,7 @@ export class Connector {
 
             Connector.staticConnector.connection.release();
 
-            Connector.staticConnector = null;
+            Connector.staticConnector.connection = null;
 
             resolve();
         });
