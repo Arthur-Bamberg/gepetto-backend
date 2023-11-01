@@ -97,6 +97,8 @@ export class Message {
             }
             const previousContent = await this.getContent(this._FK_idSection ?? 0);
 
+            Connector.closeConnection();
+
             const AIConnector: GPTConnector = new GPTConnector();
 
             const content = await AIConnector.sendPrompt(previousContent ?? '', this._content) ?? '';
@@ -149,6 +151,10 @@ export class Message {
         const sectionValues = [this._guidMessage, this._FK_idSection];
 
         try {
+            this._connector = new Connector();
+
+            await this._connector.connect();
+
             await this._connector.beginTransaction();
 
             await this._connector.query(messageSql, messageValues);
