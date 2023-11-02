@@ -20,7 +20,9 @@ export class Connector {
                 database: process.env.DATABASE,
                 waitForConnections: true,
                 connectionLimit: 10,
-                queueLimit: 0
+                queueLimit: 0,
+                enableKeepAlive: true,
+                keepAliveInitialDelay: 0
             });
 
             Connector.staticConnector = this;
