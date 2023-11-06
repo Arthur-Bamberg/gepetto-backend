@@ -4,12 +4,15 @@ dotenv.config();
 
 export class Connector {
     private static staticConnector: Connector|null = null;
+    private static isBeingUsed: boolean = false;
     private pool: Pool|null = null; 
     private connection: PoolConnection|null = null;
     private lastInsertedId: number = 0;
 
     constructor() {
         if(Connector.staticConnector) {
+            Connector.isBeingUsed = true;
+
             return Connector.staticConnector;
 
         } else {
@@ -31,6 +34,8 @@ export class Connector {
 
     public connect(): Promise<void> {
         return new Promise<void>((resolve, reject) => {
+            Connector.isBeingUsed = true;
+
             if(this.connection) {
                 resolve();
                 return;
@@ -107,6 +112,8 @@ export class Connector {
 
     public static async closeConnection(): Promise<void> {
         return new Promise<void>((resolve, reject) => {
+            Connector.isBeingUsed = false;
+
             if(!Connector.staticConnector?.connection) {
                 resolve();
                 return;
@@ -117,6 +124,15 @@ export class Connector {
             Connector.staticConnector.connection.release();
 
             Connector.staticConnector.connection = null;
+
+            const interval = setInterval(() => {
+                if(!Connector.isBeingUsed) {
+                    Connector.staticConnector?.pool?.end();
+                    Connector.staticConnector = null;
+                    
+                    clearInterval(interval);
+                }
+            }, 1000);
 
             resolve();
         });

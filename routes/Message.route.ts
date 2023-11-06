@@ -17,7 +17,10 @@ MessageRoute.post('/', async (req: Request, res: Response) => {
         const formData = req.body;
 
         if (!formData.content || !formData.idSection) {
-            return res.status(400).json({ message: 'Missing required fields' });
+            return res.status(400).json({ message: {
+                en: 'Missing required fields',
+                pt: 'Campos obrigatórios faltando!'
+            } });
         }
 
         const section = await getSection(res, formData.idSection, idUser);
@@ -48,17 +51,26 @@ MessageRoute.patch('/:guidMessage', async (req: Request, res: Response) => {
         const formData = req.body;
 
         if (guidMessage.length != 36) {
-            return res.status(404).json({ message: 'Invalid guidMessage!' });
+            return res.status(404).json({ message: {
+                en: 'Invalid guidMessage!',
+                pt: 'Identificador de mensagem inválido!'
+            } });
         }
 
         if (!formData.content && !formData.isAlternativeAnswer && !formData.isActive) {
-            return res.status(400).json({ message: 'Missing required fields!' });
+            return res.status(400).json({ message: {
+                en: 'Missing required fields',
+                pt: 'Campos obrigatórios faltando!'
+            } });
         }
 
         const message = await MessageController.getMessage(guidMessage);
 
         if (!message) {
-            return res.status(404).json({ message: 'Message not found!' });
+            return res.status(404).json({ message: {
+                en: 'Message not found!',
+                pt: 'Mensagem não encontrada!'
+            } });
         }
 
         const section = await getSection(res, message.FK_idSection ?? 0, idUser);
@@ -85,12 +97,18 @@ MessageRoute.delete('/:guidMessage', async (req: Request, res: Response) => {
 
         const guidMessage = req.params.guidMessage;
         if (guidMessage.length != 36) {
-            return res.status(404).json({ message: 'Invalid guidMessage!' });
+            return res.status(404).json({ message: {
+                en: 'Invalid guidMessage!',
+                pt: 'Identificador de mensagem inválido!'
+            } });
         }
         const message = await MessageController.getMessage(guidMessage);
 
         if (!message) {
-            return res.status(404).json({ message: 'Message not found!' });
+            return res.status(404).json({ message: {
+                en: 'Message not found!',
+                pt: 'Mensagem não encontrada!'
+            } });
         }
 
         const section = await getSection(res, message.FK_idSection ?? 0, idUser);

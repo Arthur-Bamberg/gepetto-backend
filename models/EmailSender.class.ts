@@ -42,8 +42,8 @@ export class EmailSender {
                     <p>Se você solicitou a recuperação da senha, clique no link abaixo para redefinir sua senha:</p>
                     <p><b>[ATENÇÃO] Jamais compartilhe este link com outra pessoa!</b></p>
                     <p><a href="${changePasswordReturn?.link}">Redefinir Senha</a></p>
-                    <p>Este link é válido por um dia, portanto, aconselhamos que você aja rapidamente.</p>
-                    <p>Se o botão acima não funcionar, você também pode copiar e colar o seguinte link em seu navegador:</p>
+                    <p>Este link é válido por um dia, e somente trocará a senha uma única vez, portanto, aconselhamos que você aja rapidamente.</p>
+                    <p>Se o link acima não funcionar, você também pode copiar e colar o seguinte link em seu navegador:</p>
                     <p>${changePasswordReturn?.link}</p>
                     <p>Obrigado por usar nossos serviços.</p>
                     <p>Atenciosamente,</p>

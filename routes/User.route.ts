@@ -10,11 +10,17 @@ UserRoute.post('/', async (req: Request, res: Response) => {
         const formData = req.body;
 
         if (!formData.name || !formData.email || !formData.password) {
-            return res.status(400).json({ message: 'Missing required fields' });
+            return res.status(400).json({ message: {
+                en: 'Missing required fields',
+                pt: 'Campos obrigatórios faltando!'
+            } });
         }
 
         if (!await UserController.emailIsUnique(formData.email)) {
-            return res.status(400).json({ message: 'Email already registered' });
+            return res.status(400).json({ message: {
+                en: 'Email already registered',
+                pt: 'Email já cadastrado!'
+            } });
         }
 
         const token = await UserController.createUser(formData);
@@ -34,14 +40,21 @@ UserRoute.patch('/:changePasswordId', async (req: Request, res: Response) => {
         const idUser = await UserController.authenticateByChangePasswordId(req.params.changePasswordId);
 
         if (typeof idUser != "number") {
-            return res.status(404).json({ message: 'Invalid idUser!' });
+            return res.status(404).json({ message: {
+                en: 'Invalid idUser!',
+                pt: 'Identificador de usuário inválido!'
+            } });
         }
 
         const password = req.body.password;
 
-        const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/
+;
         if (!passwordPattern.test(password)) {
-            throw new Error('password must contain at least 8 characters, including uppercase, lowercase, digit, and special characters.');
+            return res.status(400).json({ message: {
+                en: 'password must contain at least 8 characters, including uppercase, lowercase, digit, and special characters.',
+                pt: 'A senha deve conter pelo menos 8 caracteres, incluindo maiúsculas, minúsculas, dígitos e caracteres especiais.'
+            } });
         }
 
         await UserController.changePassword(idUser, password);
@@ -66,13 +79,19 @@ UserRoute.delete('/', async (req: Request, res: Response) => {
         if (typeof idUser != "number") return;
 
         if (isNaN(idUser)) {
-            return res.status(404).json({ message: 'Invalid idUser!' });
+            return res.status(404).json({ message: {
+                en: 'Invalid idUser!',
+                pt: 'Identificador de usuário inválido!'
+            } });
         }
 
         const user = await UserController.getUser(idUser);
 
         if (!user) {
-            return res.status(404).json({ message: 'user not found!' });
+            return res.status(404).json({ message: {
+                en: 'user not found!',
+                pt: 'Usuário não encontrado!'
+            } });
         }
 
         await UserController.deleteUser(user);

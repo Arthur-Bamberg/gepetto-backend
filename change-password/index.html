@@ -7,7 +7,8 @@
             const passwordConfirm = prompt("Confirme sua nova senha: ");
 
             const validatePassword = (password) => {
-                const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+                const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/
+;
                 return passwordPattern.test(password);
             };
 
@@ -40,12 +41,12 @@
                 });
 
                 if(changePasswordResult.status == 200) {
-                    changedPasswordSuccessfully = true;
+                    navigator.clipboard.writeText(password);
 
-                    alert("Senha alterada com sucesso!");
+                    window.location.href = "https://play.google.com/store/apps/details?id=com.arthurbamberg.geppetoassistant";
 
                 } else {
-                    alert("Erro ao alterar senha!");
+                    alert("Erro ao alterar senha!\nIsso pode ter ocorrido por um dos seguintes motivos:\n- O link de alteração de senha expirou;\n- O link de alteração de senha já foi utilizado.");
                 }
             }
         } while (!changedPasswordSuccessfully);

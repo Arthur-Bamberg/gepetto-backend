@@ -38,10 +38,6 @@ export class User {
         this._connector = new Connector();
     }
 
-    get idUser(): number | undefined {
-        return this._idUser;
-    }
-
     set idUser(value: number | undefined) {
         if (value !== undefined && value <= 0) {
             throw new Error('idUser must be a positive number.');
@@ -49,19 +45,11 @@ export class User {
         this._idUser = value;
     }
 
-    get name(): string {
-        return this._name;
-    }
-
     set name(value: string) {
         if (!value || value.trim().length === 0) {
             throw new Error('name cannot be empty.');
         }
         this._name = value;
-    }
-
-    get email(): string {
-        return this._email;
     }
 
     set email(value: string) {
@@ -79,15 +67,12 @@ export class User {
         if (!value || value.trim().length === 0) {
             throw new Error('password cannot be empty.');
         }
-        const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/
+;
         if (!passwordPattern.test(value)) {
             throw new Error('password must contain at least 8 characters, including uppercase, lowercase, digit, and special characters.');
         }
         this._password = value;
-    }
-
-    get isActive(): boolean | undefined {
-        return this._isActive;
     }
 
     set isActive(value: boolean | undefined) {

@@ -15,7 +15,10 @@ SectionRoute.post('/', async (req: Request, res: Response) => {
         const formData = req.body;
 
         if (!formData.name || formData.name.trim() == '') {
-            return res.status(400).json({ message: 'Missing required fields' });
+            return res.status(400).json({ message: {
+                en: 'Missing required fields',
+                pt: 'Campos obrigatórios faltando!'
+            } });
         }
 
         const section = await SectionController.createSection(formData, idUser);
@@ -41,11 +44,17 @@ SectionRoute.patch('/:idSection', async (req: Request, res: Response) => {
         const formData = req.body;
 
         if (isNaN(idSection)) {
-            return res.status(404).json({ message: 'Invalid idSection!' });
+            return res.status(404).json({ message: {
+                en: 'Invalid idSection!',
+                pt: 'Identificador de seção inválido!'
+            } });
         }
 
         if ((!formData.name || formData.name.trim() == '') && !formData.isActive) {
-            return res.status(400).json({ message: 'Missing required fields!' });
+            return res.status(400).json({ message: {
+                en: 'Missing required fields',
+                pt: 'Campos obrigatórios faltando!'
+            } });
         }
 
         const section = await getSection(res, idSection, idUser);
@@ -73,7 +82,10 @@ SectionRoute.delete('/:idSection', async (req: Request, res: Response) => {
         const idSection = parseInt(req.params.idSection);
 
         if (isNaN(idSection)) {
-            return res.status(404).json({ message: 'Invalid idSection!' });
+            return res.status(404).json({ message: {
+                en: 'Invalid idSection!',
+                pt: 'Identificador de seção inválido!'
+            } });
         }
 
         const section = await getSection(res, idSection, idUser);
@@ -100,7 +112,10 @@ SectionRoute.get('/:idSection/messages', async (req: Request, res: Response) => 
 
         const idSection = parseInt(req.params.idSection);
         if (isNaN(idSection)) {
-            return res.status(404).json({ message: 'Invalid idSection!' });
+            return res.status(404).json({ message: {
+                en: 'Invalid idSection!',
+                pt: 'Identificador de seção inválido!'
+            } });
         }
 
         const section = await getSection(res, idSection, idUser);
@@ -140,7 +155,10 @@ export const getSection = async (res: Response, idSection: number, idUser: numbe
     const section = await SectionController.getSection(idSection, idUser);
 
     if (!section) {
-        return res.status(404).json({ message: 'Section not found!' });
+        return res.status(404).json({ message: {
+            en: 'Section not found!',
+            pt: 'Seção não encontrada!'
+        } });
     }
 
     return section;

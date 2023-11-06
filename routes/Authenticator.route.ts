@@ -8,7 +8,10 @@ AuthenticatorRoute.post('/', async (req: Request, res: Response) => {
     const formData = req.body;
 
     if (!formData.email || !formData.password) {
-        return res.status(400).json({ message: 'Missing required fields' });
+        return res.status(400).json({ message: {
+            en: 'Missing required fields',
+            pt: 'Campos obrigatórios faltando!'
+        } });
     }
 
     try {
@@ -31,13 +34,19 @@ export const authenticateUser = async (req: Request, res: Response) => {
 
     try {
         if(!token) {
-            return res.status(401).json({ message: 'Missing authorization token' });
+            return res.status(401).json({ message: {
+                en: 'Missing authorization token',
+                pt: 'Token de autorização faltando!'
+            } });
         }
 
         const authData: any = await AuthenticatorController.validateToken(token);
 
         if(!authData.isValid) {
-            return res.status(401).json({ message: 'Invalid authorization token' });
+            return res.status(401).json({ message: {
+                en: 'Invalid token',
+                pt: 'Token inválido!'
+            } });
         }
 
         return authData.idUser;
