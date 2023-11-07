@@ -1,5 +1,3 @@
-ALTER TABLE `message`
-	CHANGE COLUMN `content` `content` VARCHAR(10000) NOT NULL COLLATE 'utf8mb4_general_ci' AFTER `type`;
-
-ALTER TABLE `message_history`
-	CHANGE COLUMN `content` `content` VARCHAR(10000) NOT NULL COLLATE 'utf8mb4_general_ci' AFTER `type`;
+ALTER TABLE `user`
+	ADD COLUMN `city` VARCHAR(100) NULL DEFAULT NULL AFTER `name`,
+	ADD COLUMN `sex` ENUM('M','F') NULL DEFAULT NULL AFTER `city`;

@@ -68,6 +68,8 @@ CREATE TABLE IF NOT EXISTS `section` (
 CREATE TABLE IF NOT EXISTS `user` (
   `idUser` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
+  `city` varchar(100) NULL DEFAULT NULL,
+  `sex` enum('M','F') NULL DEFAULT NULL,
   `email` varchar(50) NOT NULL,
   `password` varchar(50) NOT NULL,
   `isActive` tinyint(1) unsigned NOT NULL DEFAULT '1',

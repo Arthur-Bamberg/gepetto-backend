@@ -8,26 +8,34 @@ type ChangePasswordReturn = {
     link: string
 };
 
+type Sex = 'M' | 'F' | null;
+
 export class User {
     private _idUser?: number;
     private _name!: string;
     private _email!: string;
+    private _city?: string;
+    private _sex?: Sex;
     private _password?: string;
     private _isActive?: boolean;
     private iat?: number;
     private exp?: number;
-    private static _safeParams: string = 'user.idUser, user.name, user.email, user.isActive';
+    private static _safeParams: string = 'user.idUser, user.name, user.city, user.sex, user.email, user.isActive';
     private _connector: Connector;
 
     constructor(
         name: string,
         email: string,
         password?: string,
+        city?: string,
+        sex?: Sex,
         idUser?: number,
         isActive?: boolean
     ) {
         this.name = name;
         this.email = email;
+        this.city = city;
+        this.sex = sex;
         this.idUser = idUser;
         this.isActive = isActive ?? true;
 
@@ -50,6 +58,14 @@ export class User {
             throw new Error('name cannot be empty.');
         }
         this._name = value;
+    }
+
+    set city(value: string | undefined) {
+        this._city = value;
+    }
+
+    set sex(value: Sex | undefined) {
+        this._sex = value;
     }
 
     set email(value: string) {
@@ -83,16 +99,33 @@ export class User {
         const userTime = this.getAndSetUserTime();
 
         const sql = `
-            INSERT INTO user (name, email, password, isActive, issuedAt)
-            VALUES (?, ?, md5(sha1(?)), ?, ?)
+            INSERT INTO user (name, city, sex, email, password, isActive, issuedAt)
+            VALUES (?, ?, ?, ?, md5(sha1(?)), ?, ?)
         `;
-        const values = [this._name, this._email, this._password, this._isActive, new Date(userTime.issuedAt)];
+        const values = [this._name, this._city, this._sex, this._email, this._password, this._isActive, new Date(userTime.issuedAt)];
         try {
             await this._connector.connect();
             await this._connector.query(sql, values);
             this._idUser = this._connector.getLastInsertedId();
         } catch (err) {
             console.error('Error saving user:', err);
+        }
+    }
+
+    public async update(): Promise<void> {
+        const userTime = this.getAndSetUserTime();
+
+        const sql = `
+            UPDATE user
+            SET name = ?, city = ?, sex = ?, issuedAt = ?
+            WHERE idUser = ?
+        `;
+        const values = [this._name, this._city, this._sex, new Date(userTime.issuedAt), this._idUser];
+        try {
+            await this._connector.connect();
+            await this._connector.query(sql, values);
+        } catch (err) {
+            console.error('Error updating user:', err);
         }
     }
 
@@ -116,7 +149,7 @@ export class User {
             await connector.query(sql, values);
 
         } catch (err) {
-            console.error('Error updating user:', err);
+            console.error("Error changing user's password:", err);
         }
     }
 
@@ -153,7 +186,15 @@ export class User {
                 return null;
             }
             const row = rows[0];
-            const user = new User(row.name, row.email, row.password, row.idUser, row.isActive);
+            const user = new User(
+                row.name, 
+                row.email, 
+                row.password,
+                row.city,
+                row.sex, 
+                row.idUser, 
+                row.isActive
+            );
             return user;
         } catch (err) {
             console.error('Error fetching user by ID:', err);
@@ -178,7 +219,15 @@ export class User {
                 return null;
             }
             const row = rows[0];
-            const user = new User(row.name, row.email, password, row.idUser, row.isActive);
+            const user = new User(
+                row.name, 
+                row.email, 
+                password, 
+                row.city,
+                row.sex,
+                row.idUser, 
+                row.isActive
+            );
             return user.json();
         } catch (err) {
             console.error('Error validating user login:', err);
@@ -369,6 +418,8 @@ export class User {
         return {
             idUser: this._idUser,
             name: this._name,
+            city: this._city,
+            sex: this._sex,
             email: this._email,
             isActive: this._isActive,
             iat: this.iat,
