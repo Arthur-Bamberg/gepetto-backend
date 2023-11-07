@@ -8,7 +8,7 @@ export class UserController {
             formData.email,
             formData.password,
             formData.city,
-            formData.sex
+            formData.sex ?? null
         );
         await user.save();
         return Authenticator.signJWT(user.json());
@@ -25,6 +25,8 @@ export class UserController {
 
         if(formData.sex) {
             user.sex = formData.sex;
+        } else {
+            user.sex = null;
         }
 
         await user.update();
