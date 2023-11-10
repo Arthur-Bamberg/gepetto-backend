@@ -35,7 +35,6 @@ MessageRoute.post('/', async (req: Request, res: Response) => {
 
     } catch(error: any) {
         return res.status(400).json({ message: error.message });
-
     }
 });
 

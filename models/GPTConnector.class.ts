@@ -23,7 +23,7 @@ export class GPTConnector {
             if (response.choices[0].message.content !== undefined) {
                 return response.choices[0].message.content?.trim().replace('`', '');
             } else {
-                throw new Error('Unexpected response from OpenAI API: No choices found.');
+                throw new Error('Resposta inesperada da API da OpenAI: Nenhuma opção encontrada.');
             }
         } catch (error) {
             console.error('Error connecting with ChatGPT', error);

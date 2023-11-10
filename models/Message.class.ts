@@ -62,7 +62,7 @@ export class Message {
         if (Object.values(Type).includes(value)) {
             this._type = value;
         } else {
-            throw new Error('Invalid value for type');
+            throw new Error('Valor inválido para type.');
         }
     }
 
@@ -93,7 +93,7 @@ export class Message {
     public async saveAndGetAnswer(): Promise<Message | void> {
         try {
             if (!this._content) {
-                throw new Error('Missing content');   
+                throw new Error('content não pode estar vazio.');   
             }
             const previousContent = await this.getContent(this._FK_idSection ?? 0);
 

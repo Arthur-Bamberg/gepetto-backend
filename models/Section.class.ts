@@ -23,7 +23,7 @@ export class Section {
 
 	set idSection(id: number | undefined) {
 		if (id !== undefined && id <= 0) {
-			throw new Error('idSection must be a positive number.');
+			throw new Error('idSection deve ser um número positivo.');
 		}
 		this._idSection = id;
 	}

@@ -10,7 +10,7 @@ export class Authenticator {
         const userData = await User.validateLogin(email, password);
 
         if (!userData) {
-            throw new Error('Invalid credentials');
+            throw new Error('Credenciais inválidas!');
         }
 
         const payload = await User.updateAuthentication(userData);

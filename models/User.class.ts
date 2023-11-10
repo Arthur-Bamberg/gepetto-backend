@@ -48,14 +48,14 @@ export class User {
 
     set idUser(value: number | undefined) {
         if (value !== undefined && value <= 0) {
-            throw new Error('idUser must be a positive number.');
+            throw new Error('idUser deve ser um número positivo.');
         }
         this._idUser = value;
     }
 
     set name(value: string) {
         if (!value || value.trim().length === 0) {
-            throw new Error('name cannot be empty.');
+            throw new Error('name não pode estar vazio.');
         }
         this._name = value;
     }
@@ -70,23 +70,23 @@ export class User {
 
     set email(value: string) {
         if (!value || value.trim().length === 0) {
-            throw new Error('email cannot be empty.');
+            throw new Error('email não pode estar vazio.');
         }
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailPattern.test(value)) {
-            throw new Error('Invalid email format.');
+            throw new Error('Formato de email inválido.');
         }
         this._email = value;
     }
 
     set password(value: string) {
         if (!value || value.trim().length === 0) {
-            throw new Error('password cannot be empty.');
+            throw new Error('password não pode estar vazia.');
         }
         const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/
 ;
         if (!passwordPattern.test(value)) {
-            throw new Error('password must contain at least 8 characters, including uppercase, lowercase, digit, and special characters.');
+            throw new Error('password deve conter pelo menos 8 caracteres, incluindo maiúsculas, minúsculas, números e caracteres especiais.');
         }
         this._password = value;
     }
