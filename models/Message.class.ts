@@ -168,6 +168,9 @@ export class Message {
         } catch (err) {
             await this._connector.rollback();
             console.error('Error saving message:', err);
+            
+        } finally {
+            Connector.closeConnection();
         }
     }
 
